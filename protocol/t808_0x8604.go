@@ -1,20 +1,26 @@
 package protocol
 
 import (
-	"bytes"
-	"encoding/binary"
+	"github.com/shopspring/decimal"
+	"go808/errors"
+	"math"
+	"time"
 )
 
 // 顶点
 type Vertex struct {
-	Lat uint32
-	Lon uint32
+	Lat decimal.Decimal
+	Lon decimal.Decimal
 }
 
 // 多边形区域
 type PolygonArea struct {
 	ID        uint32
 	Attribute AreaAttribute
+	StartTime time.Time
+	EndTime   time.Time
+	MaxSpeed  uint16
+	Duration  byte
 	Vertexes  []Vertex
 }
 
@@ -24,51 +30,171 @@ type T808_0x8604 struct {
 	Items  []PolygonArea
 }
 
-// 获取类型
-func (entity *T808_0x8604) Type() Type {
-	return TypeT808_0x8604
+func (entity *T808_0x8604) MsgID() MsgID {
+	return MsgT808_0x8604
 }
 
-// 消息编码
 func (entity *T808_0x8604) Encode() ([]byte, error) {
-	buffer := bytes.NewBuffer(nil)
+	writer := NewWriter()
 
 	// 写入设置属性
-	buffer.WriteByte(byte(entity.Action))
+	writer.WriteByte(byte(entity.Action))
 
 	// 写入区域总数
-	buffer.WriteByte(byte(len(entity.Items)))
+	writer.WriteByte(byte(len(entity.Items)))
 
 	// 写入区域信息
-	var tmp [4]byte
-	for _, item := range entity.Items {
+	for i := range entity.Items {
+		item := &entity.Items[i]
+
 		// 写入区域ID
-		binary.BigEndian.PutUint32(tmp[:4], item.ID)
-		buffer.Write(tmp[:4])
+		writer.WriteUint32(item.ID)
+
+		// 计算经纬度
+		mul := decimal.NewFromFloat(1000000)
+		vertexes := make([]Vertex, 0, len(item.Vertexes))
+		for j := range item.Vertexes {
+			vertex := &item.Vertexes[j]
+			lat := vertex.Lat.Mul(mul)
+			if lat.Cmp(decimal.Zero) < 0 {
+				item.Attribute.SetSouthLatitude(true)
+			}
+			lon := vertex.Lon.Mul(mul)
+			if lon.Cmp(decimal.Zero) < 0 {
+				item.Attribute.SetWestLongitude(true)
+			}
+			vertexes = append(vertexes, Vertex{
+				Lat: lat,
+				Lon: lon,
+			})
+		}
 
 		// 写入区域属性
-		binary.BigEndian.PutUint16(tmp[:2], uint16(item.Attribute))
-		buffer.Write(tmp[:2])
+		writer.WriteUint16(uint16(item.Attribute))
+
+		// 写入时间参数
+		if item.Attribute&1 == 1 {
+			// 写入开始时间
+			writer.WriteBcdTime(item.StartTime)
+
+			// 写入结束时间
+			writer.WriteBcdTime(item.EndTime)
+
+			// 写入最高速度
+			writer.WriteUint16(item.MaxSpeed)
+
+			// 写入持续时间
+			writer.WriteByte(item.Duration)
+		}
 
 		// 写入顶点总数
-		binary.BigEndian.PutUint16(tmp[:2], uint16(len(item.Vertexes)))
-		buffer.Write(tmp[:2])
+		writer.WriteUint16(uint16(len(item.Vertexes)))
 
 		// 写入顶点信息
-		for _, vertex := range item.Vertexes {
+		for _, vertex := range vertexes {
 			// 写入纬度
-			binary.BigEndian.PutUint32(tmp[:4], vertex.Lat)
-			buffer.Write(tmp[:4])
+			writer.WriteUint32(uint32(math.Abs(float64(vertex.Lat.IntPart()))))
 
 			// 写入经度
-			binary.BigEndian.PutUint32(tmp[:4], vertex.Lon)
-			buffer.Write(tmp[:4])
+			writer.WriteUint32(uint32(math.Abs(float64(vertex.Lon.IntPart()))))
 		}
 	}
-	return buffer.Bytes(), nil
+	return writer.Bytes(), nil
 }
 
-// 消息解码
 func (entity *T808_0x8604) Decode(data []byte) (int, error) {
-	return 0, nil
+	if len(data) < 16 {
+		return 0, errors.ErrEntityDecodeFail
+	}
+	reader := NewReader(data)
+
+	// 读取设置属性
+	action, err := reader.ReadByte()
+	if err != nil {
+		return 0, errors.ErrEntityDecodeFail
+	}
+	entity.Action = AreaAction(action)
+
+	// 读取区域总数
+	count, err := reader.ReadByte()
+	if err != nil {
+		return 0, errors.ErrEntityDecodeFail
+	}
+
+	// 读取区域信息
+	entity.Items = make([]PolygonArea, 0, count)
+	for i := 0; i < int(count); i++ {
+		var area PolygonArea
+
+		// 读取区域ID
+		area.ID, err = reader.ReadUint32()
+		if err != nil {
+			return 0, errors.ErrEntityDecodeFail
+		}
+
+		// 读取区域属性
+		attribute, err := reader.ReadUint16()
+		if err != nil {
+			return 0, errors.ErrEntityDecodeFail
+		}
+		area.Attribute = AreaAttribute(attribute)
+
+		// 读取时间参数
+		if area.Attribute&1 == 1 {
+			// 读取开始时间
+			area.StartTime, err = reader.ReadBcdTime()
+			if err != nil {
+				return 0, errors.ErrEntityDecodeFail
+			}
+
+			// 读取结束时间
+			area.EndTime, err = reader.ReadBcdTime()
+			if err != nil {
+				return 0, errors.ErrEntityDecodeFail
+			}
+
+			// 读取最高速度
+			area.MaxSpeed, err = reader.ReadUint16()
+			if err != nil {
+				return 0, errors.ErrEntityDecodeFail
+			}
+
+			// 读取持续时间
+			area.Duration, err = reader.ReadByte()
+			if err != nil {
+				return 0, errors.ErrEntityDecodeFail
+			}
+		}
+
+		// 读取顶点总数
+		vertexes, err := reader.ReadUint16()
+		if err != nil {
+			return 0, errors.ErrEntityDecodeFail
+		}
+		area.Vertexes = make([]Vertex, 0, int(vertexes))
+
+		// 读取顶点列表
+		for j := 0; j < int(vertexes); j++ {
+			var vertex Vertex
+
+			// 读取纬度
+			lat, err := reader.ReadUint32()
+			if err != nil {
+				return 0, errors.ErrEntityDecodeFail
+			}
+
+			// 读取经度
+			lon, err := reader.ReadUint32()
+			if err != nil {
+				return 0, errors.ErrEntityDecodeFail
+			}
+
+			vertex.Lat, vertex.Lon = getGeoPoint(
+				lat, area.Attribute.GetLatitudeType() == SouthLatitudeType,
+				lon, area.Attribute.GetLongitudeType() == WestLongitudeType)
+			area.Vertexes = append(area.Vertexes, vertex)
+		}
+		entity.Items = append(entity.Items, area)
+	}
+	return len(data) - reader.Len(), nil
 }

@@ -1,47 +1,49 @@
 package protocol
 
 import (
-	"bytes"
-	"encoding/binary"
+	"github.com/shopspring/decimal"
+	"go808/errors"
+	"math"
+	"time"
 )
 
 // 区域属性
 type AreaAttribute uint16
 
-// 设置东经
-func (attr *AreaAttribute) SetEastLon(b bool) {
-	if !b {
-		*attr |= 1 << 7
-	} else {
-		*attr &= ^AreaAttribute(1 << 7)
-	}
+// 设置南纬
+func (attr *AreaAttribute) SetSouthLatitude(b bool) {
+	SetBitUint16((*uint16)(attr), 6, b)
 }
 
-// 设置北纬
-func (attr *AreaAttribute) SetNorthLat(b bool) {
-	if !b {
-		*attr |= 1 << 6
-	} else {
-		*attr &= ^AreaAttribute(1 << 6)
+// 设置西经
+func (attr *AreaAttribute) SetWestLongitude(b bool) {
+	SetBitUint16((*uint16)(attr), 7, b)
+}
+
+// 获取纬度类型
+func (attr AreaAttribute) GetLatitudeType() LatitudeType {
+	if GetBitUint16(uint16(attr), 6) {
+		return SouthLatitudeType
 	}
+	return NorthLatitudeType
+}
+
+// 获取经度类型
+func (attr AreaAttribute) GetLongitudeType() LongitudeType {
+	if GetBitUint16(uint16(attr), 7) {
+		return SouthLatitudeType
+	}
+	return NorthLatitudeType
 }
 
 // 设置离开报警平台
 func (attr *AreaAttribute) SetExitAlarm(b bool) {
-	if b {
-		*attr |= 1 << 5
-	} else {
-		*attr &= ^AreaAttribute(1 << 5)
-	}
+	SetBitUint16((*uint16)(attr), 5, b)
 }
 
 // 设置进入报警平台
 func (attr *AreaAttribute) SetEnterAlarm(b bool) {
-	if b {
-		*attr |= 1 << 3
-	} else {
-		*attr &= ^AreaAttribute(1 << 3)
-	}
+	SetBitUint16((*uint16)(attr), 3, b)
 }
 
 // 区域动作
@@ -57,9 +59,13 @@ var (
 type CircleArea struct {
 	ID        uint32
 	Attribute AreaAttribute
-	Lat       uint32
-	Lon       uint32
+	Lat       decimal.Decimal
+	Lon       decimal.Decimal
 	Radius    uint32
+	StartTime time.Time
+	EndTime   time.Time
+	MaxSpeed  uint16
+	Duration  byte
 }
 
 // 设置圆形区域
@@ -68,48 +74,157 @@ type T808_0x8600 struct {
 	Items  []CircleArea
 }
 
-// 获取类型
-func (entity *T808_0x8600) Type() Type {
-	return TypeT808_0x8600
+func (entity *T808_0x8600) MsgID() MsgID {
+	return MsgT808_0x8600
 }
 
-// 消息编码
 func (entity *T808_0x8600) Encode() ([]byte, error) {
-	buffer := bytes.NewBuffer(nil)
+	writer := NewWriter()
 
 	// 写入设置属性
-	buffer.WriteByte(byte(entity.Action))
+	writer.WriteByte(byte(entity.Action))
 
 	// 写入区域总数
-	buffer.WriteByte(byte(len(entity.Items)))
+	writer.WriteByte(byte(len(entity.Items)))
 
 	// 写入区域信息
-	var tmp [4]byte
-	for _, item := range entity.Items {
+	for idx := range entity.Items {
+		item := &entity.Items[idx]
+
 		// 写入区域ID
-		binary.BigEndian.PutUint32(tmp[:4], item.ID)
-		buffer.Write(tmp[:4])
+		writer.WriteUint32(item.ID)
+
+		// 计算经纬度
+		mul := decimal.NewFromFloat(1000000)
+		lat := item.Lat.Mul(mul).IntPart()
+		if lat < 0 {
+			item.Attribute.SetSouthLatitude(true)
+		}
+		lon := item.Lon.Mul(mul).IntPart()
+		if lon < 0 {
+			item.Attribute.SetWestLongitude(true)
+		}
 
 		// 写入区域属性
-		binary.BigEndian.PutUint16(tmp[:2], uint16(item.Attribute))
-		buffer.Write(tmp[:2])
+		writer.WriteUint16(uint16(item.Attribute))
 
 		// 写入中心点纬度
-		binary.BigEndian.PutUint32(tmp[:4], item.Lat)
-		buffer.Write(tmp[:4])
+		writer.WriteUint32(uint32(math.Abs(float64(lat))))
 
 		// 写入中心点经度
-		binary.BigEndian.PutUint32(tmp[:4], item.Lon)
-		buffer.Write(tmp[:4])
+		writer.WriteUint32(uint32(math.Abs(float64(lon))))
 
 		// 写入半径
-		binary.BigEndian.PutUint32(tmp[:4], item.Radius)
-		buffer.Write(tmp[:4])
+		writer.WriteUint32(item.Radius)
+
+		// 写入时间参数
+		if item.Attribute&1 == 0 {
+			continue
+		}
+
+		// 写入开始时间
+		writer.WriteBcdTime(item.StartTime)
+
+		// 写入结束时间
+		writer.WriteBcdTime(item.EndTime)
+
+		// 写入最高速度
+		writer.WriteUint16(item.MaxSpeed)
+
+		// 写入持续时间
+		writer.WriteByte(item.Duration)
 	}
-	return buffer.Bytes(), nil
+	return writer.Bytes(), nil
 }
 
-// 消息解码
 func (entity *T808_0x8600) Decode(data []byte) (int, error) {
-	return 0, nil
+	if len(data) < 20 {
+		return 0, errors.ErrEntityDecodeFail
+	}
+	reader := NewReader(data)
+
+	// 读取设置属性
+	action, err := reader.ReadByte()
+	if err != nil {
+		return 0, errors.ErrEntityDecodeFail
+	}
+	entity.Action = AreaAction(action)
+
+	// 读取区域总数
+	count, err := reader.ReadByte()
+	if err != nil {
+		return 0, errors.ErrEntityDecodeFail
+	}
+
+	// 读取区域信息
+	entity.Items = make([]CircleArea, 0, count)
+	for i := 0; i < int(count); i++ {
+		var area CircleArea
+
+		// 读取区域ID
+		area.ID, err = reader.ReadUint32()
+		if err != nil {
+			return 0, errors.ErrEntityDecodeFail
+		}
+
+		// 读取区域属性
+		attribute, err := reader.ReadUint16()
+		if err != nil {
+			return 0, errors.ErrEntityDecodeFail
+		}
+		area.Attribute = AreaAttribute(attribute)
+
+		// 读取中心点纬度
+		lat, err := reader.ReadUint32()
+		if err != nil {
+			return 0, errors.ErrEntityDecodeFail
+		}
+
+		// 读取中心点经度
+		lon, err := reader.ReadUint32()
+		if err != nil {
+			return 0, errors.ErrEntityDecodeFail
+		}
+		area.Lat, area.Lon = getGeoPoint(
+			lat, area.Attribute.GetLatitudeType() == SouthLatitudeType,
+			lon, area.Attribute.GetLongitudeType() == WestLongitudeType)
+
+		// 读取半径
+		area.Radius, err = reader.ReadUint32()
+		if err != nil {
+			return 0, errors.ErrEntityDecodeFail
+		}
+
+		// 读取时间参数
+		if area.Attribute&1 == 0 {
+			entity.Items = append(entity.Items, area)
+			continue
+		}
+
+		// 读取开始时间
+		area.StartTime, err = reader.ReadBcdTime()
+		if err != nil {
+			return 0, errors.ErrEntityDecodeFail
+		}
+
+		// 读取结束时间
+		area.EndTime, err = reader.ReadBcdTime()
+		if err != nil {
+			return 0, errors.ErrEntityDecodeFail
+		}
+
+		// 读取最高速度
+		area.MaxSpeed, err = reader.ReadUint16()
+		if err != nil {
+			return 0, errors.ErrEntityDecodeFail
+		}
+
+		// 读取持续时间
+		area.Duration, err = reader.ReadByte()
+		if err != nil {
+			return 0, errors.ErrEntityDecodeFail
+		}
+		entity.Items = append(entity.Items, area)
+	}
+	return len(data) - reader.Len(), nil
 }

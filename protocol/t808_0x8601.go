@@ -1,8 +1,7 @@
 package protocol
 
 import (
-	"bytes"
-	"encoding/binary"
+	"go808/errors"
 )
 
 // 删除圆形区域
@@ -10,29 +9,37 @@ type T808_0x8601 struct {
 	IDs []uint32
 }
 
-// 获取类型
-func (entity *T808_0x8601) Type() Type {
-	return TypeT808_0x8601
+func (entity *T808_0x8601) MsgID() MsgID {
+	return MsgT808_0x8601
 }
 
-// 消息编码
 func (entity *T808_0x8601) Encode() ([]byte, error) {
-	buffer := bytes.NewBuffer(nil)
+	writer := NewWriter()
 
 	// 写入ID总数
-	buffer.WriteByte(byte(len(entity.IDs)))
+	writer.WriteByte(byte(len(entity.IDs)))
 
 	// 写入ID列表
-	var tmp [4]byte
 	for _, id := range entity.IDs {
-		binary.BigEndian.PutUint32(tmp[:4], id)
-		buffer.Write(tmp[:4])
+		writer.WriteUint32(id)
 	}
-
-	return buffer.Bytes(), nil
+	return writer.Bytes(), nil
 }
 
-// 消息解码
 func (entity *T808_0x8601) Decode(data []byte) (int, error) {
-	return 0, nil
+	if len(data) < 1 {
+		return 0, errors.ErrEntityDecodeFail
+	}
+
+	count := int(data[0])
+	reader := NewReader(data[1:])
+	entity.IDs = make([]uint32, 0, count)
+	for i := 0; i < count; i++ {
+		id, err := reader.ReadUint32()
+		if err != nil {
+			return 0, errors.ErrEntityDecodeFail
+		}
+		entity.IDs = append(entity.IDs, id)
+	}
+	return len(data) - reader.Len() - 1, nil
 }

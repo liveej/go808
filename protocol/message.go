@@ -2,8 +2,10 @@ package protocol
 
 import (
 	"bytes"
+	"fmt"
+	log "github.com/sirupsen/logrus"
+	"go808/errors"
 	"reflect"
-	"log"
 )
 
 // 消息包
@@ -28,6 +30,7 @@ func (message *Message) Encode() ([]byte, error) {
 	checkSum, count = message.computeChecksum(body, checkSum, count)
 
 	// 编码消息头
+	message.Header.MsgID = message.Body.MsgID()
 	err = message.Header.Property.SetBodySize(uint16(len(body)))
 	if err != nil {
 		return nil, err
@@ -50,12 +53,12 @@ func (message *Message) Encode() ([]byte, error) {
 // 协议解码
 func (message *Message) Decode(data []byte) error {
 	// 检验标志位
-	if len(data) < 2 || data[0] != PrefixID || data[len(data)-1] !=PrefixID {
-		return ErrInvalidMessage
+	if len(data) < 2 || data[0] != PrefixID || data[len(data)-1] != PrefixID {
+		return errors.ErrInvalidMessage
 	}
 	data = data[1 : len(data)-1]
 	if len(data) == 0 {
-		return ErrInvalidMessage
+		return errors.ErrInvalidMessage
 	}
 
 	// 获取校验和
@@ -68,7 +71,7 @@ func (message *Message) Decode(data []byte) error {
 		} else if data[len(data)-1] == EscapeByteSufix2 {
 			sum = PrefixID
 		} else {
-			return ErrInvalidMessage
+			return errors.ErrInvalidMessage
 		}
 		data = data[:len(data)-2]
 	}
@@ -86,7 +89,7 @@ func (message *Message) Decode(data []byte) error {
 		}
 
 		if i+1 >= len(data) {
-			return ErrInvalidMessage
+			return errors.ErrInvalidMessage
 		}
 
 		b = data[i+1]
@@ -97,42 +100,73 @@ func (message *Message) Decode(data []byte) error {
 			checkSum = checkSum ^ PrefixID
 			buffer = append(buffer, PrefixID)
 		} else {
-			return ErrInvalidMessage
+			return errors.ErrInvalidMessage
 		}
 		i += 2
 	}
 
 	// 检查校验和
 	if len(buffer) == 0 || checkSum != sum {
-		return ErrInvalidCheckSum
+		return errors.ErrInvalidCheckSum
 	}
 
 	// 解码消息头
 	if len(buffer) < MessageHeaderSize {
-		return ErrInvalidHeader
+		return errors.ErrInvalidHeader
 	}
 	var header Header
 	err := header.Decode(buffer)
 	if err != nil {
 		return err
 	}
-	buffer = buffer[MessageHeaderSize:]
+	if !header.Property.IsPacket() {
+		buffer = buffer[MessageHeaderSize:]
+	} else {
+		buffer = buffer[MessageHeaderSize+4:]
+	}
 
 	// 解码消息体
 	if uint16(len(buffer)) != header.Property.GetBodySize() {
-		log.Printf("[JT/T808] body length mismatch, id: 0x%x, header: %+v",
-			header.MsgID, header)
+		log.WithFields(log.Fields{
+			"id":     fmt.Sprintf("0x%x", header.MsgID),
+			"expect": header.Property.GetBodySize(),
+			"actual": len(buffer),
+		}).Warn("[JT/T808] body length mismatch")
 	} else {
-		entity, _, err := Decode(uint16(header.MsgID), buffer)
+		entity, _, err := message.decode(uint16(header.MsgID), buffer)
 		if err == nil {
 			message.Body = entity
 		} else {
-			log.Printf("[JT/T808] failed to decode message, id: 0x%x, reason: %s",
-				header.MsgID, err)
+			log.WithFields(log.Fields{
+				"id":     fmt.Sprintf("0x%x", header.MsgID),
+				"reason": err,
+			}).Warn("[JT/T808] failed to decode message")
 		}
 	}
 	message.Header = header
 	return nil
+}
+func (message *Message) decode(typ uint16, data []byte) (Entity, int, error) {
+	creator, ok := entityMapper[typ]
+	if !ok {
+		return nil, 0, errors.ErrTypeNotRegistered
+	}
+
+	entity := creator()
+	entityPacket, ok := interface{}(entity).(EntityPacket)
+	if !ok {
+		count, err := entity.Decode(data)
+		if err != nil {
+			return nil, 0, err
+		}
+		return entity, count, nil
+	}
+
+	err := entityPacket.DecodePacket(data)
+	if err != nil {
+		return nil, 0, err
+	}
+	return entityPacket, len(data), nil
 }
 
 // 写入二进制数据

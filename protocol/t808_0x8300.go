@@ -1,11 +1,7 @@
 package protocol
 
 import (
-	"bytes"
-	"io/ioutil"
-
-	"golang.org/x/text/encoding/simplifiedchinese"
-	"golang.org/x/text/transform"
+	"go808/errors"
 )
 
 // 文本信息下发
@@ -14,26 +10,34 @@ type T808_0x8300 struct {
 	Text string
 }
 
-// 获取类型
-func (entity *T808_0x8300) Type() Type {
-	return TypeT808_0x8300
+func (entity *T808_0x8300) MsgID() MsgID {
+	return MsgT808_0x8300
 }
 
-// 消息编码
 func (entity *T808_0x8300) Encode() ([]byte, error) {
-	buffer := bytes.NewBuffer(nil)
-	buffer.WriteByte(entity.Flag)
+	writer := NewWriter()
+	writer.WriteByte(entity.Flag)
 	if len(entity.Text) > 0 {
-		text, err := ioutil.ReadAll(transform.NewReader(
-			bytes.NewReader([]byte(entity.Text)), simplifiedchinese.GB18030.NewEncoder()))
-		if err == nil {
-			buffer.Write(text)
+		if err := writer.WritString(entity.Text); err != nil {
+			return nil, err
 		}
 	}
-	return buffer.Bytes(), nil
+	return writer.Bytes(), nil
 }
 
-// 消息解码
 func (entity *T808_0x8300) Decode(data []byte) (int, error) {
-	return 0, nil
+	if len(data) < 1 {
+		return 0, errors.ErrEntityDecodeFail
+	}
+
+	entity.Flag = data[0]
+	reader := NewReader(data[1:])
+	if reader.Len() > 0 {
+		data, err := reader.ReadString()
+		if err != nil {
+			return 0, err
+		}
+		entity.Text = data
+	}
+	return len(data) - reader.Len() - 1, nil
 }

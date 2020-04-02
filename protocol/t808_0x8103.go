@@ -1,41 +1,76 @@
 package protocol
 
+import (
+	"go808/errors"
+)
+
 // 设置终端参数
 type T808_0x8103 struct {
-	//Parameters parameter.List
+	Params []*Param
 }
 
-// 获取类型
-func (entity *T808_0x8103) Type() Type {
-	return TypeT808_0x8103
+func (entity *T808_0x8103) MsgID() MsgID {
+	return MsgT808_0x8103
 }
 
-// 消息编码
 func (entity *T808_0x8103) Encode() ([]byte, error) {
-	//// 写入参数数量
-	//var tmp [4]byte
-	//buffer := bytes.NewBuffer(nil)
-	//buffer.WriteByte(byte(len(entity.Parameters)))
-	//
-	//// 写入参数列表
-	//for _, param := range entity.Parameters {
-	//	// 写入参数ID
-	//	binary.BigEndian.PutUint32(tmp[:], param.ID)
-	//	buffer.Write(tmp[:])
-	//
-	//	// 写入参数长度
-	//	buffer.WriteByte(byte(len(param.Value)))
-	//
-	//	// 写入参数数据
-	//	if len(param.Value) > 0 {
-	//		buffer.Write(param.Value)
-	//	}
-	//}
-	//return buffer.Bytes(), nil
-	return nil, nil
+	writer := NewWriter()
+
+	// 写入参数数量
+	writer.WriteByte(byte(len(entity.Params)))
+
+	// 写入参数列表
+	for _, param := range entity.Params {
+		// 写入参数ID
+		writer.WriteUint32(param.id)
+
+		// 写入参数长度
+		writer.WriteByte(byte(len(param.serialized)))
+
+		// 写入参数数据
+		writer.WriteBytes(param.serialized)
+	}
+	return writer.Bytes(), nil
 }
 
-// 消息解码
 func (entity *T808_0x8103) Decode(data []byte) (int, error) {
-	return 0, ErrEntityDecode
+	if len(data) <= 3 {
+		return 0, errors.ErrEntityDecodeFail
+	}
+	reader := NewReader(data)
+
+	// 读取参数个数
+	paramNums, err := reader.ReadByte()
+	if err != nil {
+		return 0, errors.ErrEntityDecodeFail
+	}
+
+	// 读取参数信息
+	params := make([]*Param, 0, paramNums)
+	for i := 0; i < int(paramNums); i++ {
+		// 读取参数ID
+		id, err := reader.ReadUint32()
+		if err != nil {
+			return 0, errors.ErrEntityDecodeFail
+		}
+
+		// 读取数据长度
+		size, err := reader.ReadByte()
+		if err != nil {
+			return 0, errors.ErrEntityDecodeFail
+		}
+
+		// 读取数据内容
+		value, err := reader.ReadBytes(int(size))
+		if err != nil {
+			return 0, errors.ErrEntityDecodeFail
+		}
+		params = append(params, &Param{
+			id:         id,
+			serialized: value,
+		})
+	}
+
+	entity.Params = params
+	return len(data) - reader.Len(), nil
 }

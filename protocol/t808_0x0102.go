@@ -1,11 +1,7 @@
 package protocol
 
 import (
-	"bytes"
-	"io/ioutil"
-
-	"golang.org/x/text/encoding/simplifiedchinese"
-	"golang.org/x/text/transform"
+	"go808/errors"
 )
 
 // 终端鉴权
@@ -13,36 +9,30 @@ type T808_0x0102 struct {
 	AuthKey string
 }
 
-// 获取类型
-func (entity *T808_0x0102) Type() Type {
-	return TypeT808_0x0102
+func (entity *T808_0x0102) MsgID() MsgID {
+	return MsgT808_0x0102
 }
 
-// 消息编码
 func (entity *T808_0x0102) Encode() ([]byte, error) {
-	buffer := bytes.NewBuffer(nil)
+	writer := NewWriter()
 	if len(entity.AuthKey) > 0 {
-		authKey, err := ioutil.ReadAll(transform.NewReader(
-			bytes.NewReader([]byte(entity.AuthKey)), simplifiedchinese.GB18030.NewEncoder()))
-		if err != nil {
+		if err := writer.WritString(entity.AuthKey); err != nil {
 			return nil, err
 		}
-		buffer.Write(authKey)
 	}
-	return buffer.Bytes(), nil
+	return writer.Bytes(), nil
 }
 
-// 消息解码
 func (entity *T808_0x0102) Decode(data []byte) (int, error) {
 	if len(data) == 0 {
-		return 0, ErrEntityDecode
+		return 0, errors.ErrEntityDecodeFail
 	}
 
-	reader := bytes.NewReader(data)
-	authKey, err := ioutil.ReadAll(transform.NewReader(reader, simplifiedchinese.GB18030.NewDecoder()))
+	reader := NewReader(data)
+	authKey, err := reader.ReadString()
 	if err != nil {
-		return 0, ErrEntityDecode
+		return 0, errors.ErrEntityDecodeFail
 	}
-	entity.AuthKey = string(authKey)
+	entity.AuthKey = authKey
 	return len(data) - reader.Len(), nil
 }

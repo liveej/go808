@@ -1,84 +1,107 @@
 package protocol
 
 import (
-	"bytes"
-	"encoding/binary"
-	"encoding/hex"
+	"go808/errors"
 	"strconv"
 )
 
+// 封包信息
+type Packet struct {
+	Sum uint16
+	Seq uint16
+}
+
 // 消息头
 type Header struct {
-	MsgID           Type
+	MsgID           MsgID
 	Property        Property
-	ICCID           uint64
+	IccID           uint64
 	MessageSerialNo uint16
+	Packet          *Packet
 }
 
 // 协议编码
 func (header *Header) Encode() ([]byte, error) {
+	writer := NewWriter()
+
 	// 写入消息ID
-	var tmp [8]byte
-	buffer := bytes.NewBuffer(nil)
-	binary.BigEndian.PutUint16(tmp[:2], uint16(header.MsgID))
-	buffer.Write(tmp[:2])
+	writer.WriteUint16(uint16(header.MsgID))
 
 	// 写入消息体属性
-	binary.BigEndian.PutUint16(tmp[:2], uint16(header.Property))
-	buffer.Write(tmp[:2])
+	if header.Packet != nil {
+		header.Property.setPacket()
+	}
+	writer.WriteUint16(uint16(header.Property))
 
 	// 写入终端号码
-	simID, err := hex.DecodeString(strconv.FormatUint(header.ICCID, 0))
-	if err != nil {
-		return nil, ErrInvalidHeader
-	}
-	buffer.Write(simID[2:])
+	writer.WriteBytes(stringToBCD(strconv.FormatUint(header.IccID, 10), 6))
 
 	// 写入消息流水号
-	binary.BigEndian.PutUint16(tmp[:2], uint16(header.MessageSerialNo))
-	buffer.Write(tmp[:2])
-	return buffer.Bytes(), nil
+	writer.WriteUint16(header.MessageSerialNo)
+
+	// 写入分包信息
+	if header.Property.IsPacket() {
+		writer.WriteUint16(header.Packet.Sum)
+		writer.WriteUint16(header.Packet.Seq)
+	}
+	return writer.Bytes(), nil
 }
 
 // 协议解码
 func (header *Header) Decode(data []byte) error {
 	if len(data) < MessageHeaderSize {
-		return ErrInvalidHeader
+		return errors.ErrInvalidHeader
 	}
+	reader := NewReader(data)
 
 	// 读取消息ID
-	var buffer [6]byte
-	reader := bytes.NewReader(data)
-	count, err := reader.Read(buffer[:2])
-	if err != nil || count != 2 {
-		return ErrInvalidHeader
+	msgID, err := reader.ReadUint16()
+	if err != nil {
+		return errors.ErrInvalidHeader
 	}
-	msgID := binary.BigEndian.Uint16(buffer[:2])
 
 	// 读取消息体属性
-	count, err = reader.Read(buffer[:2])
-	if err != nil || count != 2 {
-		return ErrInvalidHeader
+	property, err := reader.ReadUint16()
+	if err != nil {
+		return errors.ErrInvalidHeader
 	}
-	property := binary.BigEndian.Uint16(buffer[:2])
 
 	// 读取终端号码
-	count, err = reader.Read(buffer[:6])
-	if err != nil || count != 6 {
-		return ErrInvalidHeader
+	temp, err := reader.ReadBytes(6)
+	if err != nil {
+		return errors.ErrInvalidHeader
 	}
-	simID, _ := strconv.ParseUint(hex.EncodeToString(buffer[:6]), 10, 64)
+	iccID, err := strconv.ParseUint(bcdToString(temp), 10, 64)
+	if err != nil {
+		return err
+	}
 
 	// 读取消息流水号
-	count, err = reader.Read(buffer[:2])
-	if err != nil || count != 2 {
-		return ErrInvalidHeader
+	serialNo, err := reader.ReadUint16()
+	if err != nil {
+		return errors.ErrInvalidHeader
 	}
-	serialNo := binary.BigEndian.Uint16(buffer[:2])
 
-	// 更新消息头信息
-	header.MsgID = Type(msgID)
-	header.ICCID = simID
+	// 读取分包信息
+	if Property(property).IsPacket() {
+		var packet Packet
+
+		// 读取分包总数
+		packet.Sum, err = reader.ReadUint16()
+		if err != nil {
+			return err
+		}
+
+		// 读取分包序列号
+		packet.Seq, err = reader.ReadUint16()
+		if err != nil {
+			return err
+		}
+		header.Packet = &packet
+	}
+
+	header.MsgID = MsgID(msgID)
+	header.IccID = iccID
 	header.Property = Property(property)
 	header.MessageSerialNo = serialNo
 	return nil

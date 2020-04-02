@@ -1,8 +1,7 @@
 package protocol
 
 import (
-	"bytes"
-	"encoding/binary"
+	"go808/errors"
 )
 
 // 查询终端参数
@@ -10,24 +9,33 @@ type T808_0x8106 struct {
 	Params []uint32
 }
 
-// 获取类型
-func (entity *T808_0x8106) Type() Type {
-	return TypeT808_0x8106
+func (entity *T808_0x8106) MsgID() MsgID {
+	return MsgT808_0x8106
 }
 
-// 消息编码
 func (entity *T808_0x8106) Encode() ([]byte, error) {
-	var temp [4]byte
-	buffer := bytes.NewBuffer(nil)
-	buffer.WriteByte(byte(len(entity.Params)))
+	writer := NewWriter()
+	writer.WriteByte(byte(len(entity.Params)))
 	for _, param := range entity.Params {
-		binary.BigEndian.PutUint32(temp[:], param)
-		buffer.Write(temp[:])
+		writer.WriteUint32(param)
 	}
-	return buffer.Bytes(), nil
+	return writer.Bytes(), nil
 }
 
-// 消息解码
 func (entity *T808_0x8106) Decode(data []byte) (int, error) {
-	return 0, nil
+	if len(data) < 1 {
+		return 0, errors.ErrEntityDecodeFail
+	}
+
+	count := int(data[0])
+	reader := NewReader(data[1:])
+	entity.Params = make([]uint32, 0, count)
+	for i := 0; i < count; i++ {
+		id, err := reader.ReadUint32()
+		if err != nil {
+			return 0, errors.ErrEntityDecodeFail
+		}
+		entity.Params = append(entity.Params, id)
+	}
+	return len(data) - reader.Len() - 1, nil
 }

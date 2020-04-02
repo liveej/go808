@@ -1,6 +1,8 @@
 package protocol
 
-import "bytes"
+import (
+	"go808/errors"
+)
 
 // 数据上行透传
 type T808_0x0900 struct {
@@ -8,23 +10,19 @@ type T808_0x0900 struct {
 	Data        []byte
 }
 
-// 获取类型
-func (entity *T808_0x0900) Type() Type {
-	return TypeT808_0x0900
+func (entity *T808_0x0900) MsgID() MsgID {
+	return MsgT808_0x0900
 }
 
-// 消息编码
 func (entity *T808_0x0900) Encode() ([]byte, error) {
-	buffer := bytes.NewBuffer(nil)
-	buffer.WriteByte(entity.MessageType)
-	buffer.Write(entity.Data)
-	return buffer.Bytes(), nil
+	writer := NewWriter()
+	writer.WriteByte(entity.MessageType)
+	writer.WriteBytes(entity.Data)
+	return writer.Bytes(), nil
 }
-
-// 消息解码
 func (entity *T808_0x0900) Decode(data []byte) (int, error) {
 	if len(data) < 1 {
-		return 0, ErrEntityDecode
+		return 0, errors.ErrEntityDecodeFail
 	}
 	entity.MessageType, entity.Data = data[0], data[1:]
 	return len(data), nil

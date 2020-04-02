@@ -18,3 +18,7 @@ vendor
 *.exe
 *.prof
 *.exe~
+example/client/*
+!example/client/*.go
+example/server/*
+!example/server/*.go

@@ -1,50 +1,55 @@
 package protocol
 
 import (
-	"bytes"
-	"encoding/binary"
+	"go808/errors"
 )
 
 // 位置信息查询应答
 type T808_0x0201 struct {
 	ResponseMessageSerialNo uint16
-	GeoPointReport          *T808_0x0200
+	Result                  T808_0x0200
 }
 
-// 获取类型
-func (entity *T808_0x0201) Type() Type {
-	return TypeT808_0x0201
+func (entity *T808_0x0201) MsgID() MsgID {
+	return MsgT808_0x0201
 }
 
-// 消息编码
 func (entity *T808_0x0201) Encode() ([]byte, error) {
-	return nil, nil
+	writer := NewWriter()
+
+	// 写入消息序列号
+	writer.WriteUint16(entity.ResponseMessageSerialNo)
+
+	// 写入定位信息
+	data, err := entity.Result.Encode()
+	if err != nil {
+		return nil, err
+	}
+	writer.WriteBytes(data)
+	return writer.Bytes(), nil
 }
 
-// 消息解码
 func (entity *T808_0x0201) Decode(data []byte) (int, error) {
 	if len(data) <= 3 {
-		return 0, ErrEntityDecode
+		return 0, errors.ErrEntityDecodeFail
 	}
+	reader := NewReader(data)
 
 	// 读取消息序列号
-	buffer := make([]byte, 255)
-	reader := bytes.NewReader(data)
-	count, err := reader.Read(buffer[:2])
-	if err != nil || count != 2 {
-		return 0, ErrEntityDecode
+	responseMessageSerialNo, err := reader.ReadUint16()
+	if err != nil {
+		return 0, errors.ErrEntityDecodeFail
 	}
-	responseMessageSerialNo := binary.BigEndian.Uint16(buffer[:2])
 
 	// 读取位置信息
-	var geoPoint T808_0x0200
-	size, err := geoPoint.Decode(data[len(data)-reader.Len():])
+	var result T808_0x0200
+	size, err := result.Decode(data[len(data)-reader.Len():])
 	if err != nil {
 		return 0, err
 	}
 
 	// 更新Entity信息
-	entity.GeoPointReport = &geoPoint
+	entity.Result = result
 	entity.ResponseMessageSerialNo = responseMessageSerialNo
 	return len(data) - reader.Len() + size, nil
 }

@@ -1,11 +1,7 @@
 package protocol
 
 import (
-	"bytes"
-	"encoding/binary"
-	"golang.org/x/text/encoding/simplifiedchinese"
-	"golang.org/x/text/transform"
-	"io/ioutil"
+	"go808/errors"
 )
 
 // 终端注册
@@ -19,117 +15,96 @@ type T808_0x0100 struct {
 	LicenseNo     string // 车辆标识
 }
 
-// 获取类型
-func (entity *T808_0x0100) Type() Type {
-	return TypeT808_0x0100
+func (entity *T808_0x0100) MsgID() MsgID {
+	return MsgT808_0x0100
 }
 
-// 消息编码
 func (entity *T808_0x0100) Encode() ([]byte, error) {
-	var temp [2]byte
-	buffer := bytes.NewBuffer(nil)
+	writer := NewWriter()
 
 	// 写入省份ID
-	binary.BigEndian.PutUint16(temp[:], entity.ProvinceID)
-	buffer.Write(temp[:])
+	writer.WriteUint16(entity.ProvinceID)
 
 	// 写入城市ID
-	binary.BigEndian.PutUint16(temp[:], entity.CityID)
-	buffer.Write(temp[:])
+	writer.WriteUint16(entity.CityID)
 
 	// 写入制造商
-	var manufacturer [5]byte
-	copy(manufacturer[:], entity.ManufactureID)
-	buffer.Write(manufacturer[:])
+	writer.WriteBytes([]byte(entity.ManufactureID), 5)
 
 	// 写入终端型号
-	var model [20]byte
-	copy(model[:], entity.Model)
-	buffer.Write(model[:])
+	writer.WriteBytes([]byte(entity.Model), 20)
 
 	// 写入终端ID
-	var terminalID [7]byte
-	copy(terminalID[:], entity.TerminalID)
-	buffer.Write(terminalID[:])
+	writer.WriteBytes([]byte(entity.TerminalID), 7)
 
 	// 写入车牌颜色
-	buffer.WriteByte(entity.PlateColor)
+	writer.WriteByte(entity.PlateColor)
 
 	// 写入车辆标识
 	if len(entity.LicenseNo) > 0 {
-		reader := bytes.NewReader([]byte(entity.LicenseNo))
-		licenseNo, err := ioutil.ReadAll(transform.NewReader(reader, simplifiedchinese.GB18030.NewEncoder()))
-		if err == nil {
-			buffer.Write(licenseNo)
+		if err := writer.WritString(entity.LicenseNo); err != nil {
+			return nil, err
 		}
 	}
-	return buffer.Bytes(), nil
+	return writer.Bytes(), nil
 }
 
-// 消息解码
 func (entity *T808_0x0100) Decode(data []byte) (int, error) {
 	if len(data) < 37 {
-		return 0, ErrEntityDecode
+		return 0, errors.ErrEntityDecodeFail
 	}
-
-	var temp [2]byte
-	reader := bytes.NewReader(data)
+	reader := NewReader(data)
 
 	// 读取省份ID
-	count, err := reader.Read(temp[:2])
-	if err != nil || count != 2 {
-		return 0, ErrEntityDecode
+	province, err := reader.ReadUint16()
+	if err != nil {
+		return 0, errors.ErrEntityDecodeFail
 	}
-	province := binary.BigEndian.Uint16(temp[:2])
 
 	// 读取城市ID
-	count, err = reader.Read(temp[:2])
-	if err != nil || count != 2 {
-		return 0, ErrEntityDecode
+	city, err := reader.ReadUint16()
+	if err != nil {
+		return 0, errors.ErrEntityDecodeFail
 	}
-	city := binary.BigEndian.Uint16(temp[:2])
 
 	// 读取制造商
-	var manufacturer [5]byte
-	count, err = reader.Read(manufacturer[:])
-	if err != nil || count != len(manufacturer) {
-		return 0, ErrEntityDecode
+	manufacturer, err := reader.ReadBytes(5)
+	if err != nil {
+		return 0, errors.ErrEntityDecodeFail
 	}
 
 	// 读取终端型号
-	var model [20]byte
-	count, err = reader.Read(model[:])
-	if err != nil || count != len(model) {
-		return 0, ErrEntityDecode
+	model, err := reader.ReadBytes(20)
+	if err != nil {
+		return 0, errors.ErrEntityDecodeFail
 	}
 
 	// 读取终端ID
-	var terminalID [7]byte
-	count, err = reader.Read(terminalID[:])
-	if err != nil || count != len(terminalID) {
-		return 0, ErrEntityDecode
+	terminalID, err := reader.ReadBytes(7)
+	if err != nil {
+		return 0, errors.ErrEntityDecodeFail
 	}
 
 	// 读取车牌颜色
-	count, err = reader.Read(temp[:1])
-	if err != nil || count != 1 {
-		return 0, ErrEntityDecode
+	color, err := reader.ReadByte()
+	if err != nil {
+		return 0, errors.ErrEntityDecodeFail
 	}
-	color := temp[0]
 
 	entity.ProvinceID = province
 	entity.CityID = city
-	entity.ManufactureID = BytesToString(manufacturer[:])
-	entity.Model = BytesToString(model[:])
-	entity.TerminalID = BytesToString(terminalID[:])
+	entity.ManufactureID = bytesToString(manufacturer[:])
+	entity.Model = bytesToString(model[:])
+	entity.TerminalID = bytesToString(terminalID[:])
 	entity.PlateColor = color
 
 	// 读取车辆标识
 	if reader.Len() > 0 {
-		licenseNo, err := ioutil.ReadAll(transform.NewReader(reader, simplifiedchinese.GB18030.NewDecoder()))
-		if err == nil {
-			entity.LicenseNo = string(licenseNo)
+		licenseNo, err := reader.ReadString()
+		if err != nil {
+			return 0, errors.ErrEntityDecodeFail
 		}
+		entity.LicenseNo = licenseNo
 	}
 	return len(data) - reader.Len(), nil
 }

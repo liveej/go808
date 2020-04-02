@@ -1,20 +1,15 @@
 package protocol
 
 import (
+	"fmt"
+	"github.com/shopspring/decimal"
+	log "github.com/sirupsen/logrus"
+	"go808/errors"
+	"go808/protocol/extra"
+	"math"
+	"reflect"
 	"time"
 )
-
-// 汇报位置
-type T808_0x0200 struct {
-	Alarm     uint32            // 警告
-	State     T808_0x0200Status // 状态
-	Latitude  uint32            // 纬度
-	Longitude uint32            // 经度
-	Altitude  uint16            // 海拔高度
-	Speed     uint16            // 速度
-	Direction uint16            // 方向
-	Time      time.Time         // 时间
-}
 
 // 纬度类型
 type LatitudeType int
@@ -22,9 +17,9 @@ type LatitudeType int
 const (
 	_ LatitudeType = iota
 	// 北纬
-	SouthLatitudeType = 0
+	NorthLatitudeType = 0
 	// 南纬
-	NorthLatitudeType = 1
+	SouthLatitudeType = 1
 )
 
 // 经度类型
@@ -39,152 +34,208 @@ const (
 )
 
 // 位置状态
-type T808_0x0200Status uint32
+type T808_0x0200_Status uint32
 
 // 获取Acc状态
-func (state T808_0x0200Status) GetAccState() bool {
-	value := (state >> 0) & 1
-	return value == 1
+func (status T808_0x0200_Status) GetAccState() bool {
+	return GetBitUint32(uint32(status), 0)
 }
 
 // 是否正在定位
-func (state T808_0x0200Status) Positioning() bool {
-	value := (state >> 1) & 1
-	return value == 1
+func (status T808_0x0200_Status) Positioning() bool {
+	return GetBitUint32(uint32(status), 1)
+}
+
+// 设置南纬
+func (status *T808_0x0200_Status) SetSouthLatitude(b bool) {
+	SetBitUint32((*uint32)(status), 2, b)
+}
+
+// 设置西经
+func (status *T808_0x0200_Status) SetWestLongitude(b bool) {
+	SetBitUint32((*uint32)(status), 3, b)
 }
 
 // 获取纬度类型
-func (state T808_0x0200Status) GetLatitudeType() LatitudeType {
-	value := (state >> 2) & 1
-	if value == 1 {
-		return NorthLatitudeType
+func (status T808_0x0200_Status) GetLatitudeType() LatitudeType {
+	if GetBitUint32(uint32(status), 2) {
+		return SouthLatitudeType
 	}
-	return SouthLatitudeType
+	return NorthLatitudeType
 }
 
 // 获取经度类型
-func (state T808_0x0200Status) GetLongitudeType() LongitudeType {
-	value := (state >> 3) & 1
-	if value == 1 {
+func (status T808_0x0200_Status) GetLongitudeType() LongitudeType {
+	if GetBitUint32(uint32(status), 3) {
 		return WestLongitudeType
 	}
 	return EastLongitudeType
 }
 
-// 获取类型
-func (entity *T808_0x0200) Type() Type {
-	return TypeT808_0x0200
+// 汇报位置
+type T808_0x0200 struct {
+	Alarm     uint32             // 警告
+	Status    T808_0x0200_Status // 状态
+	Latitude  decimal.Decimal    // 纬度
+	Longitude decimal.Decimal    // 经度
+	Altitude  uint16             // 海拔高度
+	Speed     uint16             // 速度
+	Direction uint16             // 方向
+	Time      time.Time          // 时间
+	Extras    []extra.Entity     // 附加信息
 }
 
-// 消息编码
+func (entity *T808_0x0200) MsgID() MsgID {
+	return MsgT808_0x0200
+}
+
 func (entity *T808_0x0200) Encode() ([]byte, error) {
-	return nil, nil
+	writer := NewWriter()
+
+	// 写入警告标志
+	writer.WriteUint32(entity.Alarm)
+
+	// 计算经纬度
+	mul := decimal.NewFromFloat(1000000)
+	lat := entity.Latitude.Mul(mul).IntPart()
+	if lat < 0 {
+		entity.Status.SetSouthLatitude(true)
+	}
+	lon := entity.Longitude.Mul(mul).IntPart()
+	if lon < 0 {
+		entity.Status.SetWestLongitude(true)
+	}
+
+	// 写入状态信息
+	writer.WriteUint32(uint32(entity.Status))
+
+	// 写入纬度信息
+	writer.WriteUint32(uint32(math.Abs(float64(lat))))
+
+	// 写入经度信息
+	writer.WriteUint32(uint32(math.Abs(float64(lon))))
+
+	// 写入海拔高度
+	writer.WriteUint16(entity.Altitude)
+
+	// 写入速度信息
+	writer.WriteUint16(entity.Speed)
+
+	// 写入方向信息
+	writer.WriteUint16(entity.Direction)
+
+	// 写入时间信息
+	writer.WriteBcdTime(entity.Time)
+
+	// 写入附加信息
+	for i := 0; i < len(entity.Extras); i++ {
+		ext := entity.Extras[i]
+		if ext == nil || reflect.ValueOf(ext).IsNil() {
+			continue
+		}
+		data := ext.Data()
+		full := make([]byte, len(data)+2)
+		full[0], full[1] = ext.ID(), byte(len(data))
+		copy(full[2:], data)
+		writer.WriteBytes(full)
+	}
+	return writer.Bytes(), nil
 }
 
-// 消息解码
 func (entity *T808_0x0200) Decode(data []byte) (int, error) {
-	return 0, nil
-	//// 读取警告标志
-	//buffer := make([]byte, 6)
-	//reader := bytes.NewReader(data)
-	//count, err := reader.Read(buffer[:4])
-	//if err != nil || count != 4 {
-	//	return 0, ErrT808_0x0200
-	//}
-	//alarm := binary.BigEndian.Uint32(buffer[:4])
-	//
-	//// 读取状态信息
-	//count, err = reader.Read(buffer[:4])
-	//if err != nil || count != 4 {
-	//	return 0, ErrT808_0x0200
-	//}
-	//state := binary.BigEndian.Uint32(buffer[:4])
-	//
-	//// 读取纬度信息
-	//count, err = reader.Read(buffer[:4])
-	//if err != nil || count != 4 {
-	//	return 0, ErrT808_0x0200
-	//}
-	//latitude := binary.BigEndian.Uint32(buffer[:4])
-	//
-	//// 读取经度信息
-	//count, err = reader.Read(buffer[:4])
-	//if err != nil || count != 4 {
-	//	return 0, ErrT808_0x0200
-	//}
-	//longitude := binary.BigEndian.Uint32(buffer[:4])
-	//
-	//// 读取海拔高度
-	//count, err = reader.Read(buffer[:2])
-	//if err != nil || count != 2 {
-	//	return 0, ErrT808_0x0200
-	//}
-	//altitude := binary.BigEndian.Uint16(buffer[:2])
-	//
-	//// 读取行驶速度
-	//count, err = reader.Read(buffer[:2])
-	//if err != nil || count != 2 {
-	//	return 0, ErrT808_0x0200
-	//}
-	//speed := binary.BigEndian.Uint16(buffer[:2])
-	//
-	//// 读取行驶方向
-	//count, err = reader.Read(buffer[:2])
-	//if err != nil || count != 2 {
-	//	return 0, ErrT808_0x0200
-	//}
-	//direction := binary.BigEndian.Uint16(buffer[:2])
-	//
-	//// 读取上报时间
-	//count, err = reader.Read(buffer[:6])
-	//if err != nil || count != 6 {
-	//	return 0, ErrT808_0x0200
-	//}
-	//time, err := FromBCDTime(buffer[:6])
-	//if err != nil {
-	//	return 0, ErrT808_0x0200
-	//}
-	//
-	//// 解码附加信息
-	//extras := make([]extra.Entity, 0)
-	//buffer = data[len(data)-reader.Len():]
-	//for {
-	//	if len(buffer) < 2 {
-	//		break
-	//	}
-	//	id, length := buffer[0], int(buffer[1])
-	//	buffer = buffer[2:]
-	//	if len(buffer) < length {
-	//		return 0, ErrInvalidExtraLength
-	//	}
-	//
-	//	extraEntity := extra.MakeEntity(extra.Type(id))
-	//	if extraEntity != nil {
-	//		count, err := extraEntity.Decode(buffer[:length])
-	//		if err != nil {
-	//			return 0, err
-	//		}
-	//		if count > length {
-	//			return 0, ErrInvalidExtraLength
-	//		}
-	//		extras = append(extras, extraEntity)
-	//	} else {
-	//		log.WithFields(log.Fields{
-	//			"id": fmt.Sprintf("0x%x", id),
-	//		}).Trace("[JT/T808] unknown T808_0x0200 extra type")
-	//	}
-	//	buffer = buffer[length:]
-	//}
-	//
-	//// 更新Entity信息
-	//entity.Alarm = alarm
-	//entity.State = T808_0x0200State(state)
-	//entity.Latitude = latitude
-	//entity.Longitude = longitude
-	//entity.Altitude = altitude
-	//entity.Speed = speed
-	//entity.Direction = direction
-	//entity.Time = time
-	//entity.Extras = extras
-	//return len(data) - reader.Len(), nil
+	if len(data) < 28 {
+		return 0, errors.ErrEntityDecodeFail
+	}
+	reader := NewReader(data)
+
+	// 读取警告标志
+	alarm, err := reader.ReadUint32()
+	if err != nil {
+		return 0, errors.ErrEntityDecodeFail
+	}
+
+	// 读取状态信息
+	status, err := reader.ReadUint32()
+	if err != nil {
+		return 0, errors.ErrEntityDecodeFail
+	}
+
+	// 读取纬度信息
+	latitude, err := reader.ReadUint32()
+	if err != nil {
+		return 0, errors.ErrEntityDecodeFail
+	}
+
+	// 读取经度信息
+	longitude, err := reader.ReadUint32()
+	if err != nil {
+		return 0, errors.ErrEntityDecodeFail
+	}
+
+	// 读取海拔高度
+	altitude, err := reader.ReadUint16()
+	if err != nil {
+		return 0, errors.ErrEntityDecodeFail
+	}
+
+	// 读取行驶速度
+	speed, err := reader.ReadUint16()
+	if err != nil {
+		return 0, errors.ErrEntityDecodeFail
+	}
+
+	// 读取行驶方向
+	direction, err := reader.ReadUint16()
+	if err != nil {
+		return 0, errors.ErrEntityDecodeFail
+	}
+
+	// 读取上报时间
+	time, err := reader.ReadBcdTime()
+	if err != nil {
+		return 0, errors.ErrEntityDecodeFail
+	}
+
+	// 解码附加信息
+	extras := make([]extra.Entity, 0)
+	buffer := data[len(data)-reader.Len():]
+	for {
+		if len(buffer) < 2 {
+			break
+		}
+		id, length := buffer[0], int(buffer[1])
+		buffer = buffer[2:]
+		if len(buffer) < length {
+			return 0, errors.ErrInvalidExtraLength
+		}
+
+		extraEntity, count, err := extra.Decode(id, buffer[:length])
+		if err != nil {
+			if err == errors.ErrTypeNotRegistered {
+				buffer = buffer[length:]
+				log.WithFields(log.Fields{
+					"id": fmt.Sprintf("0x%x", id),
+				}).Warn("[JT/T808] unknown T808_0x0200 extra type")
+				continue
+			}
+			return 0, err
+		}
+		if count != length {
+			return 0, errors.ErrInvalidExtraLength
+		}
+		extras = append(extras, extraEntity)
+		buffer = buffer[length:]
+	}
+
+	entity.Alarm = alarm
+	entity.Status = T808_0x0200_Status(status)
+	entity.Altitude = altitude
+	entity.Speed = speed
+	entity.Direction = direction
+	entity.Time = time
+	entity.Latitude, entity.Longitude = getGeoPoint(
+		latitude, entity.Status.GetLatitudeType() == SouthLatitudeType,
+		longitude, entity.Status.GetLongitudeType() == WestLongitudeType)
+	entity.Extras = extras
+	return len(data) - reader.Len(), nil
 }
