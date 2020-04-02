@@ -1,9 +1,5 @@
 package protocol
 
-import (
-	"go808/errors"
-)
-
 // 设置终端参数
 type T808_0x8103 struct {
 	Params []*Param
@@ -35,14 +31,14 @@ func (entity *T808_0x8103) Encode() ([]byte, error) {
 
 func (entity *T808_0x8103) Decode(data []byte) (int, error) {
 	if len(data) <= 3 {
-		return 0, errors.ErrEntityDecodeFail
+		return 0, ErrInvalidBody
 	}
 	reader := NewReader(data)
 
 	// 读取参数个数
 	paramNums, err := reader.ReadByte()
 	if err != nil {
-		return 0, errors.ErrEntityDecodeFail
+		return 0, err
 	}
 
 	// 读取参数信息
@@ -51,19 +47,19 @@ func (entity *T808_0x8103) Decode(data []byte) (int, error) {
 		// 读取参数ID
 		id, err := reader.ReadUint32()
 		if err != nil {
-			return 0, errors.ErrEntityDecodeFail
+			return 0, err
 		}
 
 		// 读取数据长度
 		size, err := reader.ReadByte()
 		if err != nil {
-			return 0, errors.ErrEntityDecodeFail
+			return 0, err
 		}
 
 		// 读取数据内容
 		value, err := reader.ReadBytes(int(size))
 		if err != nil {
-			return 0, errors.ErrEntityDecodeFail
+			return 0, err
 		}
 		params = append(params, &Param{
 			id:         id,

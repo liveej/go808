@@ -1,9 +1,5 @@
 package protocol
 
-import (
-	"go808/errors"
-)
-
 // 文本信息下发
 type T808_0x8300 struct {
 	Flag byte
@@ -27,7 +23,7 @@ func (entity *T808_0x8300) Encode() ([]byte, error) {
 
 func (entity *T808_0x8300) Decode(data []byte) (int, error) {
 	if len(data) < 1 {
-		return 0, errors.ErrEntityDecodeFail
+		return 0, ErrInvalidBody
 	}
 
 	entity.Flag = data[0]

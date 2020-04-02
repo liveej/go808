@@ -1,9 +1,5 @@
 package protocol
 
-import (
-	"go808/errors"
-)
-
 // 终端应答结果
 type T808_0x8100_Result byte
 
@@ -51,27 +47,27 @@ func (entity *T808_0x8100) Encode() ([]byte, error) {
 
 func (entity *T808_0x8100) Decode(data []byte) (int, error) {
 	if len(data) < 3 {
-		return 0, errors.ErrEntityDecodeFail
+		return 0, ErrInvalidBody
 	}
 	reader := NewReader(data)
 
 	// 读取流水号
 	messageSerialNo, err := reader.ReadUint16()
 	if err != nil {
-		return 0, errors.ErrEntityDecodeFail
+		return 0, err
 	}
 
 	// 读取响应结果
 	temp, err := reader.ReadByte()
 	if err != nil {
-		return 0, errors.ErrEntityDecodeFail
+		return 0, err
 	}
 
 	// 读取鉴权码
 	if reader.Len() > 0 {
 		entity.AuthKey, err = reader.ReadString()
 		if err != nil {
-			return 0, errors.ErrEntityDecodeFail
+			return 0, err
 		}
 	}
 

@@ -1,9 +1,5 @@
 package protocol
 
-import (
-	"go808/errors"
-)
-
 // 删除多边形区域
 type T808_0x8605 struct {
 	IDs []uint32
@@ -28,7 +24,7 @@ func (entity *T808_0x8605) Encode() ([]byte, error) {
 
 func (entity *T808_0x8605) Decode(data []byte) (int, error) {
 	if len(data) < 1 {
-		return 0, errors.ErrEntityDecodeFail
+		return 0, ErrInvalidBody
 	}
 
 	count := int(data[0])
@@ -37,7 +33,7 @@ func (entity *T808_0x8605) Decode(data []byte) (int, error) {
 	for i := 0; i < count; i++ {
 		id, err := reader.ReadUint32()
 		if err != nil {
-			return 0, errors.ErrEntityDecodeFail
+			return 0, err
 		}
 		entity.IDs = append(entity.IDs, id)
 	}

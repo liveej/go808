@@ -144,56 +144,56 @@ func (entity *T808_0x0200) Encode() ([]byte, error) {
 
 func (entity *T808_0x0200) Decode(data []byte) (int, error) {
 	if len(data) < 28 {
-		return 0, errors.ErrEntityDecodeFail
+		return 0, ErrInvalidBody
 	}
 	reader := NewReader(data)
 
 	// 读取警告标志
 	alarm, err := reader.ReadUint32()
 	if err != nil {
-		return 0, errors.ErrEntityDecodeFail
+		return 0, err
 	}
 
 	// 读取状态信息
 	status, err := reader.ReadUint32()
 	if err != nil {
-		return 0, errors.ErrEntityDecodeFail
+		return 0, err
 	}
 
 	// 读取纬度信息
 	latitude, err := reader.ReadUint32()
 	if err != nil {
-		return 0, errors.ErrEntityDecodeFail
+		return 0, err
 	}
 
 	// 读取经度信息
 	longitude, err := reader.ReadUint32()
 	if err != nil {
-		return 0, errors.ErrEntityDecodeFail
+		return 0, err
 	}
 
 	// 读取海拔高度
 	altitude, err := reader.ReadUint16()
 	if err != nil {
-		return 0, errors.ErrEntityDecodeFail
+		return 0, err
 	}
 
 	// 读取行驶速度
 	speed, err := reader.ReadUint16()
 	if err != nil {
-		return 0, errors.ErrEntityDecodeFail
+		return 0, err
 	}
 
 	// 读取行驶方向
 	direction, err := reader.ReadUint16()
 	if err != nil {
-		return 0, errors.ErrEntityDecodeFail
+		return 0, err
 	}
 
 	// 读取上报时间
 	time, err := reader.ReadBcdTime()
 	if err != nil {
-		return 0, errors.ErrEntityDecodeFail
+		return 0, err
 	}
 
 	// 解码附加信息

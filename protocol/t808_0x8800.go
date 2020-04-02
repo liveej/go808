@@ -1,9 +1,5 @@
 package protocol
 
-import (
-	"go808/errors"
-)
-
 // 多媒体数据上传应答
 type T808_0x8800 struct {
 	MediaID  uint32
@@ -36,7 +32,7 @@ func (entity *T808_0x8800) Encode() ([]byte, error) {
 
 func (entity *T808_0x8800) Decode(data []byte) (int, error) {
 	if len(data) < 4 {
-		return 0, errors.ErrEntityDecodeFail
+		return 0, ErrInvalidBody
 	}
 	reader := NewReader(data)
 
@@ -44,7 +40,7 @@ func (entity *T808_0x8800) Decode(data []byte) (int, error) {
 	var err error
 	entity.MediaID, err = reader.ReadUint32()
 	if err != nil {
-		return 0, errors.ErrEntityDecodeFail
+		return 0, err
 	}
 
 	if reader.Len() == 0 {
@@ -54,14 +50,14 @@ func (entity *T808_0x8800) Decode(data []byte) (int, error) {
 	// 读取重传消息数
 	count, err := reader.ReadByte()
 	if err != nil {
-		return 0, errors.ErrEntityDecodeFail
+		return 0, err
 	}
 
 	// 读取重传消息ID
 	for i := 0; i < int(count); i++ {
 		id, err := reader.ReadUint16()
 		if err != nil {
-			return 0, errors.ErrEntityDecodeFail
+			return 0, err
 		}
 		entity.RetryIDs = append(entity.RetryIDs, id)
 	}

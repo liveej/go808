@@ -1,9 +1,5 @@
 package protocol
 
-import (
-	"go808/errors"
-)
-
 // 终端控制
 type T808_0x8105 struct {
 	Cmd  T808_0x8105_Command
@@ -47,7 +43,7 @@ func (entity *T808_0x8105) Encode() ([]byte, error) {
 
 func (entity *T808_0x8105) Decode(data []byte) (int, error) {
 	if len(data) < 1 {
-		return 0, errors.ErrEntityDecodeFail
+		return 0, ErrInvalidBody
 	}
 
 	reader := NewReader(data[1:])

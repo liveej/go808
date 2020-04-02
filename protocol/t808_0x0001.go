@@ -1,9 +1,5 @@
 package protocol
 
-import (
-	"go808/errors"
-)
-
 // 终端应答
 type T808_0x0001 struct {
 	ResponseMessageSerialNo uint16
@@ -31,26 +27,26 @@ func (entity *T808_0x0001) Encode() ([]byte, error) {
 
 func (entity *T808_0x0001) Decode(data []byte) (int, error) {
 	if len(data) < 5 {
-		return 0, errors.ErrEntityDecodeFail
+		return 0, ErrInvalidBody
 	}
 	reader := NewReader(data)
 
 	// 读取消息序列号
 	responseMessageSerialNo, err := reader.ReadUint16()
 	if err != nil {
-		return 0, errors.ErrEntityDecodeFail
+		return 0, err
 	}
 
 	// 读取响应消息ID
 	responseMessageID, err := reader.ReadUint16()
 	if err != nil {
-		return 0, errors.ErrEntityDecodeFail
+		return 0, err
 	}
 
 	// 读取响应结果
 	result, err := reader.ReadByte()
 	if err != nil {
-		return 0, errors.ErrEntityDecodeFail
+		return 0, err
 	}
 
 	entity.ResponseMessageSerialNo = responseMessageSerialNo

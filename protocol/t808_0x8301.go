@@ -2,7 +2,6 @@ package protocol
 
 import (
 	"bytes"
-	"go808/errors"
 	"golang.org/x/text/encoding/simplifiedchinese"
 	"golang.org/x/text/transform"
 	"io/ioutil"
@@ -55,7 +54,7 @@ func (entity *T808_0x8301) Encode() ([]byte, error) {
 
 func (entity *T808_0x8301) Decode(data []byte) (int, error) {
 	if len(data) < 2 {
-		return 0, errors.ErrEntityDecodeFail
+		return 0, ErrInvalidBody
 	}
 	reader := NewReader(data)
 
@@ -63,13 +62,13 @@ func (entity *T808_0x8301) Decode(data []byte) (int, error) {
 	var err error
 	entity.Type, err = reader.ReadByte()
 	if err != nil {
-		return 0, errors.ErrEntityDecodeFail
+		return 0, err
 	}
 
 	// 读取事件数量
 	count, err := reader.ReadByte()
 	if err != nil {
-		return 0, errors.ErrEntityDecodeFail
+		return 0, err
 	}
 
 	// 读取事件列表
@@ -79,19 +78,19 @@ func (entity *T808_0x8301) Decode(data []byte) (int, error) {
 		// 读取事件ID
 		event.EventID, err = reader.ReadByte()
 		if err != nil {
-			return 0, errors.ErrEntityDecodeFail
+			return 0, err
 		}
 
 		// 读取内容长度
 		size, err := reader.ReadByte()
 		if err != nil {
-			return 0, errors.ErrEntityDecodeFail
+			return 0, err
 		}
 
 		// 读取事件内容
 		event.Content, err = reader.ReadString(int(size))
 		if err != nil {
-			return 0, errors.ErrEntityDecodeFail
+			return 0, err
 		}
 		entity.Events = append(entity.Events, event)
 	}

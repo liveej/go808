@@ -2,7 +2,6 @@ package protocol
 
 import (
 	"github.com/shopspring/decimal"
-	"go808/errors"
 	"math"
 	"time"
 )
@@ -139,21 +138,21 @@ func (entity *T808_0x8600) Encode() ([]byte, error) {
 
 func (entity *T808_0x8600) Decode(data []byte) (int, error) {
 	if len(data) < 20 {
-		return 0, errors.ErrEntityDecodeFail
+		return 0, ErrInvalidBody
 	}
 	reader := NewReader(data)
 
 	// 读取设置属性
 	action, err := reader.ReadByte()
 	if err != nil {
-		return 0, errors.ErrEntityDecodeFail
+		return 0, err
 	}
 	entity.Action = AreaAction(action)
 
 	// 读取区域总数
 	count, err := reader.ReadByte()
 	if err != nil {
-		return 0, errors.ErrEntityDecodeFail
+		return 0, err
 	}
 
 	// 读取区域信息
@@ -164,26 +163,26 @@ func (entity *T808_0x8600) Decode(data []byte) (int, error) {
 		// 读取区域ID
 		area.ID, err = reader.ReadUint32()
 		if err != nil {
-			return 0, errors.ErrEntityDecodeFail
+			return 0, err
 		}
 
 		// 读取区域属性
 		attribute, err := reader.ReadUint16()
 		if err != nil {
-			return 0, errors.ErrEntityDecodeFail
+			return 0, err
 		}
 		area.Attribute = AreaAttribute(attribute)
 
 		// 读取中心点纬度
 		lat, err := reader.ReadUint32()
 		if err != nil {
-			return 0, errors.ErrEntityDecodeFail
+			return 0, err
 		}
 
 		// 读取中心点经度
 		lon, err := reader.ReadUint32()
 		if err != nil {
-			return 0, errors.ErrEntityDecodeFail
+			return 0, err
 		}
 		area.Lat, area.Lon = getGeoPoint(
 			lat, area.Attribute.GetLatitudeType() == SouthLatitudeType,
@@ -192,7 +191,7 @@ func (entity *T808_0x8600) Decode(data []byte) (int, error) {
 		// 读取半径
 		area.Radius, err = reader.ReadUint32()
 		if err != nil {
-			return 0, errors.ErrEntityDecodeFail
+			return 0, err
 		}
 
 		// 读取时间参数
@@ -204,25 +203,25 @@ func (entity *T808_0x8600) Decode(data []byte) (int, error) {
 		// 读取开始时间
 		area.StartTime, err = reader.ReadBcdTime()
 		if err != nil {
-			return 0, errors.ErrEntityDecodeFail
+			return 0, err
 		}
 
 		// 读取结束时间
 		area.EndTime, err = reader.ReadBcdTime()
 		if err != nil {
-			return 0, errors.ErrEntityDecodeFail
+			return 0, err
 		}
 
 		// 读取最高速度
 		area.MaxSpeed, err = reader.ReadUint16()
 		if err != nil {
-			return 0, errors.ErrEntityDecodeFail
+			return 0, err
 		}
 
 		// 读取持续时间
 		area.Duration, err = reader.ReadByte()
 		if err != nil {
-			return 0, errors.ErrEntityDecodeFail
+			return 0, err
 		}
 		entity.Items = append(entity.Items, area)
 	}

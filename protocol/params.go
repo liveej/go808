@@ -3,7 +3,6 @@ package protocol
 import (
 	"bytes"
 	"encoding/binary"
-	"go808/errors"
 	"golang.org/x/text/encoding/simplifiedchinese"
 	"golang.org/x/text/transform"
 	"io/ioutil"
@@ -67,7 +66,7 @@ func (param *Param) SetString(id uint32, s string) *Param {
 // 读取Byte
 func (param *Param) GetByte() (byte, error) {
 	if len(param.serialized) < 1 {
-		return 0, errors.ErrEntityDecodeFail
+		return 0, ErrInvalidBody
 	}
 	return param.serialized[0], nil
 }
@@ -82,7 +81,7 @@ func (param *Param) GetBytes() ([]byte, error) {
 // 读取Uint16
 func (param *Param) GetUint16() (uint16, error) {
 	if len(param.serialized) < 2 {
-		return 0, errors.ErrEntityDecodeFail
+		return 0, ErrInvalidBody
 	}
 	return binary.BigEndian.Uint16(param.serialized[:2]), nil
 }
@@ -90,7 +89,7 @@ func (param *Param) GetUint16() (uint16, error) {
 // 读取Uint32
 func (param *Param) GetUint32() (uint32, error) {
 	if len(param.serialized) < 4 {
-		return 0, errors.ErrEntityDecodeFail
+		return 0, ErrInvalidBody
 	}
 	return binary.BigEndian.Uint32(param.serialized[:4]), nil
 }

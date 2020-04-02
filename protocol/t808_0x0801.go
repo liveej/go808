@@ -2,7 +2,6 @@ package protocol
 
 import (
 	"bytes"
-	"go808/errors"
 	"io"
 	"io/ioutil"
 )
@@ -81,7 +80,7 @@ func (entity *T808_0x0801) Encode() ([]byte, error) {
 
 func (entity *T808_0x0801) Decode(data []byte) (int, error) {
 	if len(data) < 36 {
-		return 0, errors.ErrEntityDecodeFail
+		return 0, ErrInvalidBody
 	}
 	reader := NewReader(data)
 
@@ -89,42 +88,42 @@ func (entity *T808_0x0801) Decode(data []byte) (int, error) {
 	var err error
 	entity.MediaID, err = reader.ReadUint32()
 	if err != nil {
-		return 0, errors.ErrEntityDecodeFail
+		return 0, err
 	}
 
 	// 读取媒体类型
 	mediaType, err := reader.ReadByte()
 	if err != nil {
-		return 0, errors.ErrEntityDecodeFail
+		return 0, err
 	}
 	entity.Type = MediaType(mediaType)
 
 	// 读取媒体编码
 	coding, err := reader.ReadByte()
 	if err != nil {
-		return 0, errors.ErrEntityDecodeFail
+		return 0, err
 	}
 	entity.Coding = MediaCoding(coding)
 
 	// 读取事件类型
 	entity.Event, err = reader.ReadByte()
 	if err != nil {
-		return 0, errors.ErrEntityDecodeFail
+		return 0, err
 	}
 
 	// 读取通道ID
 	entity.ChannelID, err = reader.ReadByte()
 	if err != nil {
-		return 0, errors.ErrEntityDecodeFail
+		return 0, err
 	}
 
 	// 读取定位信息
 	buf, err := reader.ReadBytes(28)
 	if err != nil {
-		return 0, errors.ErrEntityDecodeFail
+		return 0, err
 	}
 	if _, err = entity.Location.Decode(buf); err != nil {
-		return 0, errors.ErrEntityDecodeFail
+		return 0, err
 	}
 	return len(data) - reader.Len(), nil
 }

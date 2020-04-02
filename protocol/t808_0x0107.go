@@ -1,9 +1,5 @@
 package protocol
 
-import (
-	"go808/errors"
-)
-
 // 查询终端属性应答
 type T808_0x0107 struct {
 	TerminalType    uint16 // 终端类型
@@ -59,77 +55,77 @@ func (entity *T808_0x0107) Encode() ([]byte, error) {
 
 func (entity *T808_0x0107) Decode(data []byte) (int, error) {
 	if len(data) < 48 {
-		return 0, errors.ErrEntityDecodeFail
+		return 0, ErrInvalidBody
 	}
 	reader := NewReader(data)
 
 	// 读取终端类型
 	typ, err := reader.ReadUint16()
 	if err != nil {
-		return 0, errors.ErrEntityDecodeFail
+		return 0, err
 	}
 
 	// 读取终端制造商
 	manufacture, err := reader.ReadBytes(5)
 	if err != nil {
-		return 0, errors.ErrEntityDecodeFail
+		return 0, err
 	}
 
 	// 读取终端型号
 	model, err := reader.ReadBytes(20)
 	if err != nil {
-		return 0, errors.ErrEntityDecodeFail
+		return 0, err
 	}
 
 	// 读取终端ID
 	terminalID, err := reader.ReadBytes(7)
 	if err != nil {
-		return 0, errors.ErrEntityDecodeFail
+		return 0, err
 	}
 
 	// 读取SIM卡号
 	temp, err := reader.ReadBytes(10)
 	if err != nil {
-		return 0, errors.ErrEntityDecodeFail
+		return 0, err
 	}
 	sim := bcdToString(temp)
 
 	// 读取终端硬件版本号长度
 	size, err := reader.ReadByte()
 	if err != nil {
-		return 0, errors.ErrEntityDecodeFail
+		return 0, err
 	}
 
 	// 读取终端硬件版本号
 	temp, err = reader.ReadBytes(int(size))
 	if err != nil {
-		return 0, errors.ErrEntityDecodeFail
+		return 0, err
 	}
 	hardwareVersion := bytesToString(temp)
 
 	// 读取终端软件版本号长度
 	size, err = reader.ReadByte()
 	if err != nil {
-		return 0, errors.ErrEntityDecodeFail
+		return 0, err
 	}
 
 	// 读取终端软件版本号
 	temp, err = reader.ReadBytes(int(size))
 	if err != nil {
-		return 0, errors.ErrEntityDecodeFail
+		return 0, err
 	}
 	softwareVersion := bytesToString(temp[:size])
 
 	// 读取GNSS模块属性
 	gnssProperty, err := reader.ReadByte()
 	if err != nil {
-		return 0, errors.ErrEntityDecodeFail
+		return 0, err
 	}
 
 	// 读取通信模块属性
 	commProperty, err := reader.ReadByte()
 	if err != nil {
-		return 0, errors.ErrEntityDecodeFail
+		return 0, err
 	}
 
 	entity.TerminalType = typ

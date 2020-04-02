@@ -1,9 +1,5 @@
 package protocol
 
-import (
-	"go808/errors"
-)
-
 // 位置信息查询应答
 type T808_0x0201 struct {
 	ResponseMessageSerialNo uint16
@@ -31,14 +27,14 @@ func (entity *T808_0x0201) Encode() ([]byte, error) {
 
 func (entity *T808_0x0201) Decode(data []byte) (int, error) {
 	if len(data) <= 3 {
-		return 0, errors.ErrEntityDecodeFail
+		return 0, ErrInvalidBody
 	}
 	reader := NewReader(data)
 
 	// 读取消息序列号
 	responseMessageSerialNo, err := reader.ReadUint16()
 	if err != nil {
-		return 0, errors.ErrEntityDecodeFail
+		return 0, err
 	}
 
 	// 读取位置信息

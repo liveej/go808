@@ -2,7 +2,6 @@ package protocol
 
 import (
 	"github.com/shopspring/decimal"
-	"go808/errors"
 	"math"
 	"time"
 )
@@ -104,21 +103,21 @@ func (entity *T808_0x8604) Encode() ([]byte, error) {
 
 func (entity *T808_0x8604) Decode(data []byte) (int, error) {
 	if len(data) < 16 {
-		return 0, errors.ErrEntityDecodeFail
+		return 0, ErrInvalidBody
 	}
 	reader := NewReader(data)
 
 	// 读取设置属性
 	action, err := reader.ReadByte()
 	if err != nil {
-		return 0, errors.ErrEntityDecodeFail
+		return 0, err
 	}
 	entity.Action = AreaAction(action)
 
 	// 读取区域总数
 	count, err := reader.ReadByte()
 	if err != nil {
-		return 0, errors.ErrEntityDecodeFail
+		return 0, err
 	}
 
 	// 读取区域信息
@@ -129,13 +128,13 @@ func (entity *T808_0x8604) Decode(data []byte) (int, error) {
 		// 读取区域ID
 		area.ID, err = reader.ReadUint32()
 		if err != nil {
-			return 0, errors.ErrEntityDecodeFail
+			return 0, err
 		}
 
 		// 读取区域属性
 		attribute, err := reader.ReadUint16()
 		if err != nil {
-			return 0, errors.ErrEntityDecodeFail
+			return 0, err
 		}
 		area.Attribute = AreaAttribute(attribute)
 
@@ -144,32 +143,32 @@ func (entity *T808_0x8604) Decode(data []byte) (int, error) {
 			// 读取开始时间
 			area.StartTime, err = reader.ReadBcdTime()
 			if err != nil {
-				return 0, errors.ErrEntityDecodeFail
+				return 0, err
 			}
 
 			// 读取结束时间
 			area.EndTime, err = reader.ReadBcdTime()
 			if err != nil {
-				return 0, errors.ErrEntityDecodeFail
+				return 0, err
 			}
 
 			// 读取最高速度
 			area.MaxSpeed, err = reader.ReadUint16()
 			if err != nil {
-				return 0, errors.ErrEntityDecodeFail
+				return 0, err
 			}
 
 			// 读取持续时间
 			area.Duration, err = reader.ReadByte()
 			if err != nil {
-				return 0, errors.ErrEntityDecodeFail
+				return 0, err
 			}
 		}
 
 		// 读取顶点总数
 		vertexes, err := reader.ReadUint16()
 		if err != nil {
-			return 0, errors.ErrEntityDecodeFail
+			return 0, err
 		}
 		area.Vertexes = make([]Vertex, 0, int(vertexes))
 
@@ -180,13 +179,13 @@ func (entity *T808_0x8604) Decode(data []byte) (int, error) {
 			// 读取纬度
 			lat, err := reader.ReadUint32()
 			if err != nil {
-				return 0, errors.ErrEntityDecodeFail
+				return 0, err
 			}
 
 			// 读取经度
 			lon, err := reader.ReadUint32()
 			if err != nil {
-				return 0, errors.ErrEntityDecodeFail
+				return 0, err
 			}
 
 			vertex.Lat, vertex.Lon = getGeoPoint(

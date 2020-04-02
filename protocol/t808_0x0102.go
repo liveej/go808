@@ -1,9 +1,5 @@
 package protocol
 
-import (
-	"go808/errors"
-)
-
 // 终端鉴权
 type T808_0x0102 struct {
 	AuthKey string
@@ -25,13 +21,13 @@ func (entity *T808_0x0102) Encode() ([]byte, error) {
 
 func (entity *T808_0x0102) Decode(data []byte) (int, error) {
 	if len(data) == 0 {
-		return 0, errors.ErrEntityDecodeFail
+		return 0, ErrInvalidBody
 	}
 
 	reader := NewReader(data)
 	authKey, err := reader.ReadString()
 	if err != nil {
-		return 0, errors.ErrEntityDecodeFail
+		return 0, err
 	}
 	entity.AuthKey = authKey
 	return len(data) - reader.Len(), nil

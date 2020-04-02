@@ -19,8 +19,6 @@ var (
 	ErrInvalidMessage = errors.New("invalid message")
 	// 无效消息校验和
 	ErrInvalidCheckSum = errors.New("invalid check sum")
-	// 消息解码失败
-	ErrEntityDecodeFail = errors.New("entity decode fail")
 	// 消息类型未注册
 	ErrTypeNotRegistered = errors.New("entity not registered")
 	// 附加信息长度错误

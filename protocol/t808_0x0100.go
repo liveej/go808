@@ -1,9 +1,5 @@
 package protocol
 
-import (
-	"go808/errors"
-)
-
 // 终端注册
 type T808_0x0100 struct {
 	ProvinceID    uint16 // 省份
@@ -51,44 +47,44 @@ func (entity *T808_0x0100) Encode() ([]byte, error) {
 
 func (entity *T808_0x0100) Decode(data []byte) (int, error) {
 	if len(data) < 37 {
-		return 0, errors.ErrEntityDecodeFail
+		return 0, ErrInvalidBody
 	}
 	reader := NewReader(data)
 
 	// 读取省份ID
 	province, err := reader.ReadUint16()
 	if err != nil {
-		return 0, errors.ErrEntityDecodeFail
+		return 0, err
 	}
 
 	// 读取城市ID
 	city, err := reader.ReadUint16()
 	if err != nil {
-		return 0, errors.ErrEntityDecodeFail
+		return 0, err
 	}
 
 	// 读取制造商
 	manufacturer, err := reader.ReadBytes(5)
 	if err != nil {
-		return 0, errors.ErrEntityDecodeFail
+		return 0, err
 	}
 
 	// 读取终端型号
 	model, err := reader.ReadBytes(20)
 	if err != nil {
-		return 0, errors.ErrEntityDecodeFail
+		return 0, err
 	}
 
 	// 读取终端ID
 	terminalID, err := reader.ReadBytes(7)
 	if err != nil {
-		return 0, errors.ErrEntityDecodeFail
+		return 0, err
 	}
 
 	// 读取车牌颜色
 	color, err := reader.ReadByte()
 	if err != nil {
-		return 0, errors.ErrEntityDecodeFail
+		return 0, err
 	}
 
 	entity.ProvinceID = province
@@ -102,7 +98,7 @@ func (entity *T808_0x0100) Decode(data []byte) (int, error) {
 	if reader.Len() > 0 {
 		licenseNo, err := reader.ReadString()
 		if err != nil {
-			return 0, errors.ErrEntityDecodeFail
+			return 0, err
 		}
 		entity.LicenseNo = licenseNo
 	}

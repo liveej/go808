@@ -1,9 +1,5 @@
 package protocol
 
-import (
-	"go808/errors"
-)
-
 // 临时位置跟踪控制
 type T808_0x8202 struct {
 	Interval uint16
@@ -27,7 +23,7 @@ func (entity *T808_0x8202) Encode() ([]byte, error) {
 
 func (entity *T808_0x8202) Decode(data []byte) (int, error) {
 	if len(data) < 4 {
-		return 0, errors.ErrEntityDecodeFail
+		return 0, ErrInvalidBody
 	}
 	reader := NewReader(data)
 
@@ -35,13 +31,13 @@ func (entity *T808_0x8202) Decode(data []byte) (int, error) {
 	var err error
 	entity.Interval, err = reader.ReadUint16()
 	if err != nil {
-		return 0, errors.ErrEntityDecodeFail
+		return 0, err
 	}
 
 	// 读取跟踪有效期
 	entity.Expire, err = reader.ReadUint32()
 	if err != nil {
-		return 0, errors.ErrEntityDecodeFail
+		return 0, err
 	}
 	return len(data) - reader.Len(), nil
 }
