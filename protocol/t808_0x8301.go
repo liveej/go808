@@ -8,16 +8,16 @@ import (
 	"io/ioutil"
 )
 
-// 事件信息
-type Event struct {
-	EventID byte
-	Content string
-}
-
 // 事件设置
 type T808_0x8301 struct {
 	Type   byte
-	Events []Event
+	Events []T808_0x8301_Event
+}
+
+// 事件信息
+type T808_0x8301_Event struct {
+	EventID byte
+	Content string
 }
 
 func (entity *T808_0x8301) MsgID() MsgID {
@@ -74,7 +74,7 @@ func (entity *T808_0x8301) Decode(data []byte) (int, error) {
 
 	// 读取事件列表
 	for i := 0; i < int(count); i++ {
-		var event Event
+		var event T808_0x8301_Event
 
 		// 读取事件ID
 		event.EventID, err = reader.ReadByte()

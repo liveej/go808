@@ -7,21 +7,22 @@ import (
 	"testing"
 )
 
-func TestT808_0x8301_EncodeDecode(t *testing.T) {
-	message := protocol.T808_0x8301{
-		Type: 2,
-		Events: []protocol.T808_0x8301_Event{
+func TestT808_0x8302_EncodeDecode(t *testing.T) {
+	message := protocol.T808_0x8302{
+		Flag:     2,
+		Question: "今天星期几？",
+		CandidateAnswers: []protocol.T808_0x8302_Answer{
 			{
-				EventID: 1,
-				Content: "事件1",
+				AnswerID: 1,
+				Content:  "星期一",
 			},
 			{
-				EventID: 2,
-				Content: "事件2",
+				AnswerID: 2,
+				Content:  "星期二",
 			},
 			{
-				EventID: 3,
-				Content: "事件3",
+				AnswerID: 3,
+				Content:  "星期三",
 			},
 		},
 	}
@@ -30,7 +31,7 @@ func TestT808_0x8301_EncodeDecode(t *testing.T) {
 		assert.Error(t, err, "encode error")
 	}
 
-	var message2 protocol.T808_0x8301
+	var message2 protocol.T808_0x8302
 	_, err = message2.Decode(data)
 	if err != nil {
 		assert.Error(t, err, "decode error")
