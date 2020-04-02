@@ -24,26 +24,26 @@ func (entity *T808_0x0107) Encode() ([]byte, error) {
 	writer.WriteUint16(entity.TerminalType)
 
 	// 写入终端制造商
-	writer.WriteBytes([]byte(entity.ManufactureID), 5)
+	writer.Write([]byte(entity.ManufactureID), 5)
 
 	// 写入终端型号
-	writer.WriteBytes([]byte(entity.Model), 20)
+	writer.Write([]byte(entity.Model), 20)
 
 	// 写入终端ID
-	writer.WriteBytes([]byte(entity.TerminalID), 7)
+	writer.Write([]byte(entity.TerminalID), 7)
 
 	// 写入终端Sim卡号
-	writer.WriteBytes(stringToBCD(entity.Sim, 10))
+	writer.Write(stringToBCD(entity.Sim, 10))
 
 	// 写入终端硬件版本
 	hardwareVersion := []byte(entity.HardwareVersion)
 	writer.WriteByte(byte(len(hardwareVersion)))
-	writer.WriteBytes(hardwareVersion)
+	writer.Write(hardwareVersion)
 
 	// 写入终端固件版本号
 	softwareVersion := []byte(entity.SoftwareVersion)
 	writer.WriteByte(byte(len(softwareVersion)))
-	writer.WriteBytes(softwareVersion)
+	writer.Write(softwareVersion)
 
 	// 写入GNSS模块属性
 	writer.WriteByte(entity.GNSSProperty)
@@ -66,25 +66,25 @@ func (entity *T808_0x0107) Decode(data []byte) (int, error) {
 	}
 
 	// 读取终端制造商
-	manufacture, err := reader.ReadBytes(5)
+	manufacture, err := reader.Read(5)
 	if err != nil {
 		return 0, err
 	}
 
 	// 读取终端型号
-	model, err := reader.ReadBytes(20)
+	model, err := reader.Read(20)
 	if err != nil {
 		return 0, err
 	}
 
 	// 读取终端ID
-	terminalID, err := reader.ReadBytes(7)
+	terminalID, err := reader.Read(7)
 	if err != nil {
 		return 0, err
 	}
 
 	// 读取SIM卡号
-	temp, err := reader.ReadBytes(10)
+	temp, err := reader.Read(10)
 	if err != nil {
 		return 0, err
 	}
@@ -97,7 +97,7 @@ func (entity *T808_0x0107) Decode(data []byte) (int, error) {
 	}
 
 	// 读取终端硬件版本号
-	temp, err = reader.ReadBytes(int(size))
+	temp, err = reader.Read(int(size))
 	if err != nil {
 		return 0, err
 	}
@@ -110,7 +110,7 @@ func (entity *T808_0x0107) Decode(data []byte) (int, error) {
 	}
 
 	// 读取终端软件版本号
-	temp, err = reader.ReadBytes(int(size))
+	temp, err = reader.Read(int(size))
 	if err != nil {
 		return 0, err
 	}

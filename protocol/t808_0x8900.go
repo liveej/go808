@@ -13,7 +13,7 @@ func (entity *T808_0x8900) MsgID() MsgID {
 func (entity *T808_0x8900) Encode() ([]byte, error) {
 	writer := NewWriter()
 	writer.WriteByte(entity.MessageType)
-	writer.WriteBytes(entity.Data)
+	writer.Write(entity.Data)
 	return writer.Bytes(), nil
 }
 

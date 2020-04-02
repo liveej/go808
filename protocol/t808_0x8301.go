@@ -47,7 +47,7 @@ func (entity *T808_0x8301) Encode() ([]byte, error) {
 		writer.WriteByte(byte(len(content)))
 
 		// 写入事件内容
-		writer.WriteBytes(content)
+		writer.Write(content)
 	}
 	return writer.Bytes(), nil
 }

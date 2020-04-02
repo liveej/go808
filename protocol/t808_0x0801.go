@@ -65,7 +65,7 @@ func (entity *T808_0x0801) Encode() ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
-	writer.WriteBytes(data)
+	writer.Write(data)
 
 	// 写入数据包
 	if entity.Packet != nil {
@@ -73,7 +73,7 @@ func (entity *T808_0x0801) Encode() ([]byte, error) {
 		if err != nil {
 			return nil, err
 		}
-		writer.WriteBytes(data)
+		writer.Write(data)
 	}
 	return writer.Bytes(), nil
 }
@@ -118,7 +118,7 @@ func (entity *T808_0x0801) Decode(data []byte) (int, error) {
 	}
 
 	// 读取定位信息
-	buf, err := reader.ReadBytes(28)
+	buf, err := reader.Read(28)
 	if err != nil {
 		return 0, err
 	}

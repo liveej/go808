@@ -22,6 +22,23 @@ func (writer *Writer) Bytes() []byte {
 	return writer.b.Bytes()
 }
 
+func (writer *Writer) Write(p []byte, size ...int) {
+	if len(size) == 0 {
+		writer.b.Write(p)
+		return
+	}
+
+	if len(p) >= size[0] {
+		writer.b.Write(p[:size[0]])
+	} else {
+		writer.b.Write(p)
+		end := size[0] - len(p)
+		for i := 0; i < end; i++ {
+			writer.b.WriteByte(0)
+		}
+	}
+}
+
 func (writer *Writer) WriteByte(b byte) {
 	writer.b.WriteByte(b)
 }
@@ -42,23 +59,6 @@ func (writer *Writer) WriteBcdTime(t time.Time) {
 	writer.b.Write(toBCDTime(t))
 }
 
-func (writer *Writer) WriteBytes(p []byte, size ...int) {
-	if len(size) == 0 {
-		writer.b.Write(p)
-		return
-	}
-
-	if len(p) >= size[0] {
-		writer.b.Write(p[:size[0]])
-	} else {
-		writer.b.Write(p)
-		end := size[0] - len(p)
-		for i := 0; i < end; i++ {
-			writer.b.WriteByte(0)
-		}
-	}
-}
-
 func (writer *Writer) WritString(str string, size ...int) error {
 	reader := bytes.NewReader([]byte(str))
 	data, err := ioutil.ReadAll(
@@ -66,7 +66,7 @@ func (writer *Writer) WritString(str string, size ...int) error {
 	if err != nil {
 		return err
 	}
-	writer.WriteBytes(data, size...)
+	writer.Write(data, size...)
 	return nil
 }
 
@@ -81,6 +81,22 @@ func NewReader(data []byte) Reader {
 
 func (reader *Reader) Len() int {
 	return reader.r.Len()
+}
+
+func (reader *Reader) Read(size ...int) ([]byte, error) {
+	num := reader.r.Len()
+	if len(size) > 0 {
+		num = size[0]
+	}
+
+	if num > reader.r.Len() {
+		return nil, io.ErrUnexpectedEOF
+	}
+
+	curr := len(reader.d) - reader.r.Len()
+	buf := reader.d[curr : curr+num]
+	reader.r.Seek(int64(num), io.SeekCurrent)
+	return buf, nil
 }
 
 func (reader *Reader) ReadByte() (byte, error) {
@@ -135,24 +151,8 @@ func (reader *Reader) ReadBcdTime() (time.Time, error) {
 	return fromBCDTime(buf[:])
 }
 
-func (reader *Reader) ReadBytes(size ...int) ([]byte, error) {
-	num := reader.r.Len()
-	if len(size) > 0 {
-		num = size[0]
-	}
-
-	if num > reader.r.Len() {
-		return nil, io.ErrUnexpectedEOF
-	}
-
-	curr := len(reader.d) - reader.r.Len()
-	buf := reader.d[curr : curr+num]
-	reader.r.Seek(int64(num), io.SeekCurrent)
-	return buf, nil
-}
-
 func (reader *Reader) ReadString(size ...int) (string, error) {
-	data, err := reader.ReadBytes(size...)
+	data, err := reader.Read(size...)
 	if err != nil {
 		return "", err
 	}

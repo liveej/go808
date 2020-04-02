@@ -27,7 +27,7 @@ func (entity *T808_0x8108) Encode() ([]byte, error) {
 	writer.WriteByte(entity.Type)
 
 	// 写入制造商
-	writer.WriteBytes([]byte(entity.ManufactureID), 5)
+	writer.Write([]byte(entity.ManufactureID), 5)
 
 	// 转换版本编码
 	reader := bytes.NewReader([]byte(entity.Version))
@@ -41,13 +41,13 @@ func (entity *T808_0x8108) Encode() ([]byte, error) {
 	writer.WriteByte(byte(len(version)))
 
 	// 写入版本信息
-	writer.WriteBytes(version)
+	writer.Write(version)
 
 	// 写入升级包长度
 	writer.WriteUint32(entity.Size)
 
 	// 写入升级包数据
-	writer.WriteBytes(entity.Data)
+	writer.Write(entity.Data)
 	return writer.Bytes(), nil
 }
 
@@ -65,7 +65,7 @@ func (entity *T808_0x8108) Decode(data []byte) (int, error) {
 	}
 
 	// 读取制造商
-	manufacture, err := reader.ReadBytes(5)
+	manufacture, err := reader.Read(5)
 	if err != nil {
 		return 0, err
 	}
@@ -90,7 +90,7 @@ func (entity *T808_0x8108) Decode(data []byte) (int, error) {
 	}
 
 	// 读取升级包数据
-	entity.Data, err = reader.ReadBytes()
+	entity.Data, err = reader.Read()
 	if err != nil {
 		return 0, err
 	}

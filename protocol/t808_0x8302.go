@@ -40,7 +40,7 @@ func (entity *T808_0x8302) Encode() ([]byte, error) {
 	writer.WriteByte(byte(len(question)))
 
 	// 写入问题内容
-	writer.WriteBytes(question)
+	writer.Write(question)
 
 	// 写入候选答案
 	for _, answer := range entity.CandidateAnswers {
@@ -57,7 +57,7 @@ func (entity *T808_0x8302) Encode() ([]byte, error) {
 		writer.WriteByte(byte(len(content)))
 
 		// 写入答案内容
-		writer.WriteBytes(content)
+		writer.Write(content)
 	}
 	return writer.Bytes(), nil
 }

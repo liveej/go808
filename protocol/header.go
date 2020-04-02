@@ -34,7 +34,7 @@ func (header *Header) Encode() ([]byte, error) {
 	writer.WriteUint16(uint16(header.Property))
 
 	// 写入终端号码
-	writer.WriteBytes(stringToBCD(strconv.FormatUint(header.IccID, 10), 6))
+	writer.Write(stringToBCD(strconv.FormatUint(header.IccID, 10), 6))
 
 	// 写入消息流水号
 	writer.WriteUint16(header.MessageSerialNo)
@@ -67,7 +67,7 @@ func (header *Header) Decode(data []byte) error {
 	}
 
 	// 读取终端号码
-	temp, err := reader.ReadBytes(6)
+	temp, err := reader.Read(6)
 	if err != nil {
 		return errors.ErrInvalidHeader
 	}

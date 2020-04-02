@@ -25,13 +25,13 @@ func (entity *T808_0x0100) Encode() ([]byte, error) {
 	writer.WriteUint16(entity.CityID)
 
 	// 写入制造商
-	writer.WriteBytes([]byte(entity.ManufactureID), 5)
+	writer.Write([]byte(entity.ManufactureID), 5)
 
 	// 写入终端型号
-	writer.WriteBytes([]byte(entity.Model), 20)
+	writer.Write([]byte(entity.Model), 20)
 
 	// 写入终端ID
-	writer.WriteBytes([]byte(entity.TerminalID), 7)
+	writer.Write([]byte(entity.TerminalID), 7)
 
 	// 写入车牌颜色
 	writer.WriteByte(entity.PlateColor)
@@ -64,19 +64,19 @@ func (entity *T808_0x0100) Decode(data []byte) (int, error) {
 	}
 
 	// 读取制造商
-	manufacturer, err := reader.ReadBytes(5)
+	manufacturer, err := reader.Read(5)
 	if err != nil {
 		return 0, err
 	}
 
 	// 读取终端型号
-	model, err := reader.ReadBytes(20)
+	model, err := reader.Read(20)
 	if err != nil {
 		return 0, err
 	}
 
 	// 读取终端ID
-	terminalID, err := reader.ReadBytes(7)
+	terminalID, err := reader.Read(7)
 	if err != nil {
 		return 0, err
 	}

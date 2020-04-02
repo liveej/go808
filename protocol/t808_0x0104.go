@@ -28,7 +28,7 @@ func (entity *T808_0x0104) Encode() ([]byte, error) {
 		writer.WriteByte(byte(len(param.serialized)))
 
 		// 写入参数数据
-		writer.WriteBytes(param.serialized)
+		writer.Write(param.serialized)
 	}
 	return writer.Bytes(), nil
 }
@@ -67,7 +67,7 @@ func (entity *T808_0x0104) Decode(data []byte) (int, error) {
 		}
 
 		// 读取数据内容
-		value, err := reader.ReadBytes(int(size))
+		value, err := reader.Read(int(size))
 		if err != nil {
 			return 0, err
 		}

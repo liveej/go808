@@ -21,7 +21,7 @@ func (entity *T808_0x0201) Encode() ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
-	writer.WriteBytes(data)
+	writer.Write(data)
 	return writer.Bytes(), nil
 }
 

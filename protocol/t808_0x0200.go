@@ -137,7 +137,7 @@ func (entity *T808_0x0200) Encode() ([]byte, error) {
 		full := make([]byte, len(data)+2)
 		full[0], full[1] = ext.ID(), byte(len(data))
 		copy(full[2:], data)
-		writer.WriteBytes(full)
+		writer.Write(full)
 	}
 	return writer.Bytes(), nil
 }
