@@ -30,6 +30,8 @@ const (
 	MsgT808_0x0302 MsgID = 0x0302
 	// 信息点播/取消
 	MsgT808_0x0303 MsgID = 0x0303
+	// 车辆控制
+	MsgT808_0x0500 MsgID = 0x0500
 	// 多媒体数据上传
 	MsgT808_0x0801 MsgID = 0x0801
 	// 平台通用应答
@@ -66,6 +68,12 @@ const (
 	MsgT808_0x8303 MsgID = 0x8303
 	// 信息服务
 	MsgT808_0x8304 MsgID = 0x8304
+	// 电话回拨
+	MsgT808_0x8400 MsgID = 0x8400
+	// 设置电话本
+	MsgT808_0x8401 MsgID = 0x8401
+	// 车门控制
+	MsgT808_0x8500 MsgID = 0x8500
 	// 设置圆形区域
 	MsgT808_0x8600 MsgID = 0x8600
 	// 删除圆形区域
@@ -131,6 +139,9 @@ var entityMapper = map[uint16]func() Entity{
 	uint16(MsgT808_0x0303): func() Entity {
 		return new(T808_0x0303)
 	},
+	uint16(MsgT808_0x0500): func() Entity {
+		return new(T808_0x0500)
+	},
 	uint16(MsgT808_0x0801): func() Entity {
 		return new(T808_0x0801)
 	},
@@ -184,6 +195,15 @@ var entityMapper = map[uint16]func() Entity{
 	},
 	uint16(MsgT808_0x8304): func() Entity {
 		return new(T808_0x8304)
+	},
+	uint16(MsgT808_0x8400): func() Entity {
+		return new(T808_0x8400)
+	},
+	uint16(MsgT808_0x8401): func() Entity {
+		return new(T808_0x8401)
+	},
+	uint16(MsgT808_0x8500): func() Entity {
+		return new(T808_0x8500)
 	},
 	uint16(MsgT808_0x8600): func() Entity {
 		return new(T808_0x8600)
