@@ -72,6 +72,10 @@ const (
 	MsgT808_0x8604 MsgID = 0x8604
 	// 删除多边形区域
 	MsgT808_0x8605 MsgID = 0x8605
+	// 设置路线
+	MsgT808_0x8606 MsgID = 0x8606
+	// 删除路线
+	MsgT808_0x8607 MsgID = 0x8607
 	// 多媒体数据上传应答
 	MsgT808_0x8800 MsgID = 0x8800
 	// 数据下行透传
@@ -183,6 +187,12 @@ var entityMapper = map[uint16]func() Entity{
 	},
 	uint16(MsgT808_0x8605): func() Entity {
 		return new(T808_0x8605)
+	},
+	uint16(MsgT808_0x8606): func() Entity {
+		return new(T808_0x8606)
+	},
+	uint16(MsgT808_0x8607): func() Entity {
+		return new(T808_0x8607)
 	},
 	uint16(MsgT808_0x8800): func() Entity {
 		return new(T808_0x8800)

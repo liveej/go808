@@ -19,8 +19,8 @@ func TestT808_0x0801_EncodeDecode(t *testing.T) {
 		Location: protocol.T808_0x0200{
 			Alarm:     2342,
 			Status:    0,
-			Latitude:  decimal.NewFromFloat(23.562345),
-			Longitude: decimal.NewFromFloat(-128.323123),
+			Lat:       decimal.NewFromFloat(23.562345),
+			Lon:       decimal.NewFromFloat(-128.323123),
 			Altitude:  2345,
 			Speed:     160,
 			Direction: 72,

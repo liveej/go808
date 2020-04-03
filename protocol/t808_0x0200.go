@@ -76,8 +76,8 @@ func (status T808_0x0200_Status) GetLongitudeType() LongitudeType {
 type T808_0x0200 struct {
 	Alarm     uint32             // 警告
 	Status    T808_0x0200_Status // 状态
-	Latitude  decimal.Decimal    // 纬度
-	Longitude decimal.Decimal    // 经度
+	Lat       decimal.Decimal    // 纬度
+	Lon       decimal.Decimal    // 经度
 	Altitude  uint16             // 海拔高度
 	Speed     uint16             // 速度
 	Direction uint16             // 方向
@@ -97,11 +97,11 @@ func (entity *T808_0x0200) Encode() ([]byte, error) {
 
 	// 计算经纬度
 	mul := decimal.NewFromFloat(1000000)
-	lat := entity.Latitude.Mul(mul).IntPart()
+	lat := entity.Lat.Mul(mul).IntPart()
 	if lat < 0 {
 		entity.Status.SetSouthLatitude(true)
 	}
-	lon := entity.Longitude.Mul(mul).IntPart()
+	lon := entity.Lon.Mul(mul).IntPart()
 	if lon < 0 {
 		entity.Status.SetWestLongitude(true)
 	}
@@ -233,7 +233,7 @@ func (entity *T808_0x0200) Decode(data []byte) (int, error) {
 	entity.Speed = speed
 	entity.Direction = direction
 	entity.Time = time
-	entity.Latitude, entity.Longitude = getGeoPoint(
+	entity.Lat, entity.Lon = getGeoPoint(
 		latitude, entity.Status.GetLatitudeType() == SouthLatitudeType,
 		longitude, entity.Status.GetLongitudeType() == WestLongitudeType)
 	entity.Extras = extras
