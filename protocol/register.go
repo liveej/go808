@@ -36,6 +36,8 @@ const (
 	MsgT808_0x0700 MsgID = 0x0700
 	// 电子运单上报
 	MsgT808_0x0701 MsgID = 0x0701
+	// 驾驶员身份信息采集上报
+	MsgT808_0x0702 MsgID = 0x0702
 	// 多媒体数据上传
 	MsgT808_0x0801 MsgID = 0x0801
 	// 平台通用应答
@@ -98,6 +100,8 @@ const (
 	MsgT808_0x8700 MsgID = 0x8700
 	// 行驶记录参数下传命令
 	MsgT808_0x8701 MsgID = 0x8701
+	// 上报驾驶员身份信息请求
+	MsgT808_0x8702 MsgID = 0x8702
 	// 多媒体数据上传应答
 	MsgT808_0x8800 MsgID = 0x8800
 	// 数据下行透传
@@ -155,6 +159,9 @@ var entityMapper = map[uint16]func() Entity{
 	},
 	uint16(MsgT808_0x0701): func() Entity {
 		return new(T808_0x0701)
+	},
+	uint16(MsgT808_0x0702): func() Entity {
+		return new(T808_0x0702)
 	},
 	uint16(MsgT808_0x0801): func() Entity {
 		return new(T808_0x0801)
@@ -244,10 +251,13 @@ var entityMapper = map[uint16]func() Entity{
 		return new(T808_0x8607)
 	},
 	uint16(MsgT808_0x8700): func() Entity {
-		return new(T808_0x8607)
+		return new(T808_0x8700)
 	},
 	uint16(MsgT808_0x8701): func() Entity {
-		return new(T808_0x8607)
+		return new(T808_0x8701)
+	},
+	uint16(MsgT808_0x8702): func() Entity {
+		return new(T808_0x8702)
 	},
 	uint16(MsgT808_0x8800): func() Entity {
 		return new(T808_0x8800)
