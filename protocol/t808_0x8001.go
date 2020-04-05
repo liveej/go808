@@ -2,9 +2,9 @@ package protocol
 
 // 平台通用应答
 type T808_0x8001 struct {
-	ResponseMessageSerialNo uint16         // 对应的终端消息的流水号
-	ResponseMsgID           MsgID          // 对应的终端消息的ID
-	Result                  ResponseResult // 处理结果
+	AnswerMessageSerialNo uint16         // 对应的终端消息的流水号
+	ResponseMsgID         MsgID          // 对应的终端消息的ID
+	Result                ResponseResult // 处理结果
 }
 
 func (entity *T808_0x8001) MsgID() MsgID {
@@ -15,7 +15,7 @@ func (entity *T808_0x8001) Encode() ([]byte, error) {
 	writer := NewWriter()
 
 	// 写入流水号
-	writer.WriteUint16(entity.ResponseMessageSerialNo)
+	writer.WriteUint16(entity.AnswerMessageSerialNo)
 
 	// 写入消息ID
 	writer.WriteUint16(uint16(entity.ResponseMsgID))
@@ -51,6 +51,6 @@ func (entity *T808_0x8001) Decode(data []byte) (int, error) {
 
 	entity.ResponseMsgID = MsgID(msgID)
 	entity.Result = ResponseResult(b)
-	entity.ResponseMessageSerialNo = messageSerialNo
+	entity.AnswerMessageSerialNo = messageSerialNo
 	return len(data) - reader.Len(), nil
 }

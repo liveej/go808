@@ -2,9 +2,9 @@ package protocol
 
 // 终端应答
 type T808_0x0001 struct {
-	ResponseMessageSerialNo uint16
-	ResponseMessageID       uint16
-	ResponseResult          ResponseResult
+	AnswerMessageSerialNo uint16
+	ResponseMessageID     uint16
+	ResponseResult        ResponseResult
 }
 
 func (entity *T808_0x0001) MsgID() MsgID {
@@ -15,7 +15,7 @@ func (entity *T808_0x0001) Encode() ([]byte, error) {
 	writer := NewWriter()
 
 	// 写入消息序列号
-	writer.WriteUint16(entity.ResponseMessageSerialNo)
+	writer.WriteUint16(entity.AnswerMessageSerialNo)
 
 	// 写入响应消息ID
 	writer.WriteUint16(entity.ResponseMessageID)
@@ -49,7 +49,7 @@ func (entity *T808_0x0001) Decode(data []byte) (int, error) {
 		return 0, err
 	}
 
-	entity.ResponseMessageSerialNo = responseMessageSerialNo
+	entity.AnswerMessageSerialNo = responseMessageSerialNo
 	entity.ResponseMessageID = responseMessageID
 	entity.ResponseResult = ResponseResult(result)
 	return len(data) - reader.Len(), nil

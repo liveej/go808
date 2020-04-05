@@ -2,8 +2,8 @@ package protocol
 
 // 查询终端参数应答
 type T808_0x0104 struct {
-	ResponseMessageSerialNo uint16
-	Params                  []*Param
+	AnswerMessageSerialNo uint16
+	Params                []*Param
 }
 
 func (entity *T808_0x0104) MsgID() MsgID {
@@ -14,7 +14,7 @@ func (entity *T808_0x0104) Encode() ([]byte, error) {
 	writer := NewWriter()
 
 	// 写入消息序列号
-	writer.WriteUint16(entity.ResponseMessageSerialNo)
+	writer.WriteUint16(entity.AnswerMessageSerialNo)
 
 	// 写入参数个数
 	writer.WriteByte(byte(len(entity.Params)))
@@ -78,6 +78,6 @@ func (entity *T808_0x0104) Decode(data []byte) (int, error) {
 	}
 
 	entity.Params = params
-	entity.ResponseMessageSerialNo = responseMessageSerialNo
+	entity.AnswerMessageSerialNo = responseMessageSerialNo
 	return len(data) - reader.Len(), nil
 }

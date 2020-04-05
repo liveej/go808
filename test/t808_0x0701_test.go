@@ -7,18 +7,17 @@ import (
 	"testing"
 )
 
-func TestT808_0x8001_EncodeDecode(t *testing.T) {
-	message := protocol.T808_0x8001{
-		AnswerMessageSerialNo: 1234,
-		Result:                protocol.T808_0x8100_ResultTerminalRegistered,
-		ResponseMsgID:         protocol.MsgT808_0x8103,
+func TestT808_0x0701_EncodeDecode(t *testing.T) {
+	message := protocol.T808_0x0701{
+		Size:    3875,
+		Content: []byte{1, 3, 5, 7, 9},
 	}
 	data, err := message.Encode()
 	if err != nil {
 		assert.Error(t, err, "encode error")
 	}
 
-	var message2 protocol.T808_0x8001
+	var message2 protocol.T808_0x0701
 	_, err = message2.Decode(data)
 	if err != nil {
 		assert.Error(t, err, "decode error")
