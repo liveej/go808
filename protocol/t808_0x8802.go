@@ -4,7 +4,7 @@ import "time"
 
 // 存储多媒体数据检索
 type T808_0x8802 struct {
-	Type      T808_0x0801_MediaType
+	Type      T808_0x0800_MediaType
 	ChannelID byte
 	Event     byte
 	StartTime time.Time
@@ -46,7 +46,7 @@ func (entity *T808_0x8802) Decode(data []byte) (int, error) {
 	if err != nil {
 		return 0, err
 	}
-	entity.Type = T808_0x0801_MediaType(mediaType)
+	entity.Type = T808_0x0800_MediaType(mediaType)
 
 	// 读取通道ID
 	entity.ChannelID, err = reader.ReadByte()

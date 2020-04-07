@@ -9,33 +9,13 @@ import (
 // 多媒体数据上传
 type T808_0x0801 struct {
 	MediaID   uint32
-	Type      T808_0x0801_MediaType
-	Coding    T808_0x0801_MediaCoding
+	Type      T808_0x0800_MediaType
+	Coding    T808_0x0800_MediaCoding
 	Event     byte
 	ChannelID byte
 	Location  T808_0x0200
 	Packet    io.Reader
 }
-
-// 多媒体类型
-type T808_0x0801_MediaType byte
-
-var (
-	T808_0x0801_MediaTypeImage T808_0x0801_MediaType = 0
-	T808_0x0801_MediaTypeAudio T808_0x0801_MediaType = 1
-	T808_0x0801_MediaTypeVideo T808_0x0801_MediaType = 2
-)
-
-// 多媒体编码
-type T808_0x0801_MediaCoding byte
-
-var (
-	T808_0x0801_MediaCodingJPEG T808_0x0801_MediaCoding = 0
-	T808_0x0801_MediaCodingTIF  T808_0x0801_MediaCoding = 1
-	T808_0x0801_MediaCodingMP3  T808_0x0801_MediaCoding = 2
-	T808_0x0801_MediaCodingWAV  T808_0x0801_MediaCoding = 3
-	T808_0x0801_MediaCodingWMV  T808_0x0801_MediaCoding = 4
-)
 
 func (entity *T808_0x0801) MsgID() MsgID {
 	return MsgT808_0x0801
@@ -96,14 +76,14 @@ func (entity *T808_0x0801) Decode(data []byte) (int, error) {
 	if err != nil {
 		return 0, err
 	}
-	entity.Type = T808_0x0801_MediaType(mediaType)
+	entity.Type = T808_0x0800_MediaType(mediaType)
 
 	// 读取媒体编码
 	coding, err := reader.ReadByte()
 	if err != nil {
 		return 0, err
 	}
-	entity.Coding = T808_0x0801_MediaCoding(coding)
+	entity.Coding = T808_0x0800_MediaCoding(coding)
 
 	// 读取事件类型
 	entity.Event, err = reader.ReadByte()

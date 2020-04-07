@@ -15,7 +15,7 @@ func TestT808_0x0802_EncodeDecode(t *testing.T) {
 		Items: []protocol.T808_0x0802_Item{
 			{
 				MediaID:   345,
-				Type:      protocol.T808_0x0801_MediaTypeImage,
+				Type:      protocol.T808_0x0800_MediaTypeImage,
 				ChannelID: 24,
 				Event:     12,
 				Location: protocol.T808_0x0200{

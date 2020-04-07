@@ -16,31 +16,6 @@ func bytesToString(data []byte) string {
 	return string(data[:n])
 }
 
-// BCD转字符串
-func bcdToString(data []byte) string {
-	for {
-		if len(data) == 0 {
-			return ""
-		}
-		if data[0] != 0 {
-			break
-		}
-		data = data[1:]
-	}
-
-	buf := make([]byte, 0, len(data)*2)
-	for i := 0; i < len(data); i++ {
-		buf = append(buf, data[i]&0xf0>>4+'0')
-		buf = append(buf, data[i]&0x0f+'0')
-	}
-
-	s := string(buf)
-	if s[0] != '0' {
-		return s
-	}
-	return s[1:]
-}
-
 // 字符串转BCD
 func stringToBCD(s string, size ...int) []byte {
 	if (len(s) & 1) != 0 {
@@ -66,6 +41,34 @@ func stringToBCD(s string, size ...int) []byte {
 		copy(ret[len(ret)-len(bcd):], bcd)
 	}
 	return ret
+}
+
+// BCD转字符串
+func bcdToString(data []byte, ignorePadding ...bool) string {
+	for {
+		if len(data) == 0 {
+			return ""
+		}
+		if data[0] != 0 {
+			break
+		}
+		data = data[1:]
+	}
+
+	buf := make([]byte, 0, len(data)*2)
+	for i := 0; i < len(data); i++ {
+		buf = append(buf, data[i]&0xf0>>4+'0')
+		buf = append(buf, data[i]&0x0f+'0')
+	}
+
+	if len(ignorePadding) == 0 || !ignorePadding[0] {
+		for idx := range buf {
+			if buf[idx] != '0' {
+				return string(buf[idx:])
+			}
+		}
+	}
+	return string(buf)
 }
 
 // 转为BCD时间

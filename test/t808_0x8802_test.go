@@ -10,7 +10,7 @@ import (
 
 func TestT808_0x8802_EncodeDecode(t *testing.T) {
 	message := protocol.T808_0x8802{
-		Type:      protocol.T808_0x0801_MediaTypeAudio,
+		Type:      protocol.T808_0x0800_MediaTypeAudio,
 		ChannelID: 56,
 		Event:     87,
 		StartTime: time.Unix(time.Now().Unix(), 0),

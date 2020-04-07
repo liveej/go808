@@ -12,8 +12,8 @@ import (
 func TestT808_0x0801_EncodeDecode(t *testing.T) {
 	message := protocol.T808_0x0801{
 		MediaID:   1024,
-		Type:      protocol.T808_0x0801_MediaTypeAudio,
-		Coding:    protocol.T808_0x0801_MediaCodingJPEG,
+		Type:      protocol.T808_0x0800_MediaTypeAudio,
+		Coding:    protocol.T808_0x0800_MediaCodingJPEG,
 		Event:     13,
 		ChannelID: 28,
 		Location: protocol.T808_0x0200{

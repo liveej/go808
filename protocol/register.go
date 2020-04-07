@@ -38,6 +38,12 @@ const (
 	MsgT808_0x0701 MsgID = 0x0701
 	// 驾驶员身份信息采集上报
 	MsgT808_0x0702 MsgID = 0x0702
+	// 定位数据批量上传
+	MsgT808_0x0704 MsgID = 0x0704
+	// CAN总线数据上传
+	MsgT808_0x0705 MsgID = 0x0705
+	// 多媒体事件信息上传
+	MsgT808_0x0800 MsgID = 0x0800
 	// 多媒体数据上传
 	MsgT808_0x0801 MsgID = 0x0801
 	// 存储多媒体数据检索应答
@@ -176,6 +182,15 @@ var entityMapper = map[uint16]func() Entity{
 	},
 	uint16(MsgT808_0x0702): func() Entity {
 		return new(T808_0x0702)
+	},
+	uint16(MsgT808_0x0704): func() Entity {
+		return new(T808_0x0704)
+	},
+	uint16(MsgT808_0x0705): func() Entity {
+		return new(T808_0x0705)
+	},
+	uint16(MsgT808_0x0800): func() Entity {
+		return new(T808_0x0800)
 	},
 	uint16(MsgT808_0x0801): func() Entity {
 		return new(T808_0x0801)

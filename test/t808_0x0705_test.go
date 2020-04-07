@@ -8,21 +8,20 @@ import (
 	"time"
 )
 
-func TestT808_0x8803_EncodeDecode(t *testing.T) {
-	message := protocol.T808_0x8803{
-		Type:       protocol.T808_0x0800_MediaTypeAudio,
-		ChannelID:  56,
-		Event:      87,
-		StartTime:  time.Unix(time.Now().Unix(), 0),
-		EndTime:    time.Unix(time.Now().Unix(), 0),
-		RemoveFlag: 1,
+func TestT808_0x0705_EncodeDecode(t *testing.T) {
+	message := protocol.T808_0x0705{
+		ReceiveTime: time.Second*13457 + time.Millisecond*999,
+		Items: []protocol.T808_0x0705_CAN{
+			{},
+			{},
+		},
 	}
 	data, err := message.Encode()
 	if err != nil {
 		assert.Error(t, err, "encode error")
 	}
 
-	var message2 protocol.T808_0x8803
+	var message2 protocol.T808_0x0705
 	_, err = message2.Decode(data)
 	if err != nil {
 		assert.Error(t, err, "decode error")

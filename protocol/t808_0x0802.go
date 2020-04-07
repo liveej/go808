@@ -9,7 +9,7 @@ type T808_0x0802 struct {
 // 多媒体检索项
 type T808_0x0802_Item struct {
 	MediaID   uint32
-	Type      T808_0x0801_MediaType
+	Type      T808_0x0800_MediaType
 	ChannelID byte
 	Event     byte
 	Location  T808_0x0200
@@ -88,7 +88,7 @@ func (entity *T808_0x0802) Decode(data []byte) (int, error) {
 		if err != nil {
 			return 0, err
 		}
-		item.Type = T808_0x0801_MediaType(mediaType)
+		item.Type = T808_0x0800_MediaType(mediaType)
 
 		// 读取通道ID
 		item.ChannelID, err = reader.ReadByte()
