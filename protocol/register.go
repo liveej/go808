@@ -40,6 +40,8 @@ const (
 	MsgT808_0x0702 MsgID = 0x0702
 	// 多媒体数据上传
 	MsgT808_0x0801 MsgID = 0x0801
+	// 存储多媒体数据检索应答
+	MsgT808_0x0802 MsgID = 0x0802
 	// 摄像头立即拍摄命令应答
 	MsgT808_0x0805 MsgID = 0x0805
 	// 平台通用应答
@@ -108,6 +110,14 @@ const (
 	MsgT808_0x8800 MsgID = 0x8800
 	// 摄像头立即拍摄命令
 	MsgT808_0x8801 MsgID = 0x8801
+	// 存储多媒体数据检索
+	MsgT808_0x8802 MsgID = 0x8802
+	// 存储多媒体数据上传命令
+	MsgT808_0x8803 MsgID = 0x8803
+	// 录音开始命令
+	MsgT808_0x8804 MsgID = 0x8804
+	// 单条存储多媒体数据检索上传命令
+	MsgT808_0x8805 MsgID = 0x8805
 	// 数据下行透传
 	MsgT808_0x8900 MsgID = 0x8900
 	// 数据上行透传
@@ -169,6 +179,9 @@ var entityMapper = map[uint16]func() Entity{
 	},
 	uint16(MsgT808_0x0801): func() Entity {
 		return new(T808_0x0801)
+	},
+	uint16(MsgT808_0x0802): func() Entity {
+		return new(T808_0x0802)
 	},
 	uint16(MsgT808_0x0805): func() Entity {
 		return new(T808_0x0805)
@@ -271,6 +284,18 @@ var entityMapper = map[uint16]func() Entity{
 	},
 	uint16(MsgT808_0x8801): func() Entity {
 		return new(T808_0x8801)
+	},
+	uint16(MsgT808_0x8802): func() Entity {
+		return new(T808_0x8802)
+	},
+	uint16(MsgT808_0x8803): func() Entity {
+		return new(T808_0x8803)
+	},
+	uint16(MsgT808_0x8804): func() Entity {
+		return new(T808_0x8804)
+	},
+	uint16(MsgT808_0x8805): func() Entity {
+		return new(T808_0x8805)
 	},
 	uint16(MsgT808_0x8900): func() Entity {
 		return new(T808_0x8900)

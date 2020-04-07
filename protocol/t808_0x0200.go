@@ -236,6 +236,8 @@ func (entity *T808_0x0200) Decode(data []byte) (int, error) {
 	entity.Lat, entity.Lon = getGeoPoint(
 		latitude, entity.Status.GetLatitudeType() == SouthLatitudeType,
 		longitude, entity.Status.GetLongitudeType() == WestLongitudeType)
-	entity.Extras = extras
+	if len(extras) > 0 {
+		entity.Extras = extras
+	}
 	return len(data) - reader.Len(), nil
 }
