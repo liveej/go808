@@ -40,6 +40,8 @@ const (
 	MsgT808_0x0702 MsgID = 0x0702
 	// 多媒体数据上传
 	MsgT808_0x0801 MsgID = 0x0801
+	// 摄像头立即拍摄命令应答
+	MsgT808_0x0805 MsgID = 0x0805
 	// 平台通用应答
 	MsgT808_0x8001 MsgID = 0x8001
 	// 补传分包请求
@@ -104,6 +106,8 @@ const (
 	MsgT808_0x8702 MsgID = 0x8702
 	// 多媒体数据上传应答
 	MsgT808_0x8800 MsgID = 0x8800
+	// 摄像头立即拍摄命令
+	MsgT808_0x8801 MsgID = 0x8801
 	// 数据下行透传
 	MsgT808_0x8900 MsgID = 0x8900
 	// 数据上行透传
@@ -165,6 +169,9 @@ var entityMapper = map[uint16]func() Entity{
 	},
 	uint16(MsgT808_0x0801): func() Entity {
 		return new(T808_0x0801)
+	},
+	uint16(MsgT808_0x0805): func() Entity {
+		return new(T808_0x0805)
 	},
 	uint16(MsgT808_0x8001): func() Entity {
 		return new(T808_0x8001)
@@ -261,6 +268,9 @@ var entityMapper = map[uint16]func() Entity{
 	},
 	uint16(MsgT808_0x8800): func() Entity {
 		return new(T808_0x8800)
+	},
+	uint16(MsgT808_0x8801): func() Entity {
+		return new(T808_0x8801)
 	},
 	uint16(MsgT808_0x8900): func() Entity {
 		return new(T808_0x8900)
