@@ -22,10 +22,10 @@ func (writer *Writer) Bytes() []byte {
 	return writer.b.Bytes()
 }
 
-func (writer *Writer) Write(p []byte, size ...int) {
+func (writer *Writer) Write(p []byte, size ...int) *Writer {
 	if len(size) == 0 {
 		writer.b.Write(p)
-		return
+		return writer
 	}
 
 	if len(p) >= size[0] {
@@ -37,26 +37,31 @@ func (writer *Writer) Write(p []byte, size ...int) {
 			writer.b.WriteByte(0)
 		}
 	}
+	return writer
 }
 
-func (writer *Writer) WriteByte(b byte) {
+func (writer *Writer) WriteByte(b byte) *Writer {
 	writer.b.WriteByte(b)
+	return writer
 }
 
-func (writer *Writer) WriteUint16(n uint16) {
+func (writer *Writer) WriteUint16(n uint16) *Writer {
 	var buf [2]byte
 	binary.BigEndian.PutUint16(buf[:], n)
 	writer.b.Write(buf[:])
+	return writer
 }
 
-func (writer *Writer) WriteUint32(n uint32) {
+func (writer *Writer) WriteUint32(n uint32) *Writer {
 	var buf [4]byte
 	binary.BigEndian.PutUint32(buf[:], n)
 	writer.b.Write(buf[:])
+	return writer
 }
 
-func (writer *Writer) WriteBcdTime(t time.Time) {
+func (writer *Writer) WriteBcdTime(t time.Time) *Writer {
 	writer.b.Write(toBCDTime(t))
+	return writer
 }
 
 func (writer *Writer) WritString(str string, size ...int) error {

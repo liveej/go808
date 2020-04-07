@@ -128,6 +128,8 @@ const (
 	MsgT808_0x8900 MsgID = 0x8900
 	// 数据上行透传
 	MsgT808_0x0900 MsgID = 0x0900
+	// 数据压缩上报
+	MsgT808_0x0901 MsgID = 0x0901
 )
 
 // 消息实体映射
@@ -317,6 +319,9 @@ var entityMapper = map[uint16]func() Entity{
 	},
 	uint16(MsgT808_0x0900): func() Entity {
 		return new(T808_0x0900)
+	},
+	uint16(MsgT808_0x0901): func() Entity {
+		return new(T808_0x0901)
 	},
 }
 
