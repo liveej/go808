@@ -2,7 +2,9 @@ package protocol
 
 // 电话回拨
 type T808_0x8400 struct {
-	Flag   T808_0x8400_Flag
+	// 标志
+	Flag T808_0x8400_Flag
+	// 电话号码
 	Number string
 }
 

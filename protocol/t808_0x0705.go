@@ -9,13 +9,21 @@ import (
 
 // CAN总线数据上传
 type T808_0x0705 struct {
+	// CAN总线数据接收时间
 	ReceiveTime time.Duration
-	Items       []T808_0x0705_CAN
+	// CAN总线数据项
+	Items []T808_0x0705_CAN
 }
 
 // CAN总线数据项
 type T808_0x0705_CAN struct {
-	ID   [4]byte
+	// CAN ID
+	// bit31 表示 CAN通道号， 0：CAN1，1：CAN2
+	// bit30 表示帧类型， 0：标准帧， 1：扩展帧
+	// bit29 表示数据采集方式， 0：原始数据， 1：采集区间的平均值
+	// bit28-bit0 表示 CAN总线 ID
+	ID [4]byte
+	// CAN数据
 	Data [8]byte
 }
 

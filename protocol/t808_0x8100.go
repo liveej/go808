@@ -18,9 +18,12 @@ const (
 
 // 终端应答
 type T808_0x8100 struct {
-	MessageSerialNo uint16             // 对应的终端注册消息的流水号
-	Result          T808_0x8100_Result // 结果
-	AuthKey         string             // 鉴权码
+	// 应答流水号
+	MessageSerialNo uint16
+	// 结果
+	Result T808_0x8100_Result
+	// 鉴权码
+	AuthKey string
 }
 
 func (entity *T808_0x8100) MsgID() MsgID {

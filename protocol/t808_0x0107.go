@@ -2,15 +2,30 @@ package protocol
 
 // 查询终端属性应答
 type T808_0x0107 struct {
-	TerminalType    uint16 // 终端类型
-	ManufactureID   string // 制造商
-	Model           string // 终端型号
-	TerminalID      string // 终端ID
-	Sim             string // SIM卡号
-	HardwareVersion string // 终端硬件版本
-	SoftwareVersion string // 终端固件版本号
-	GNSSProperty    byte   // GNSS模块属性
-	COMMProperty    byte   // 通信模块属性
+	// 终端类型
+	// bit0 ，0：不适用客运车辆， 1：适用客运车辆；
+	// bit1 ，0：不适用危险品车辆， 1：适用危险品车辆；
+	// bit2 ，0：不适用普通货运车辆， 1：适用普通货运车辆；
+	// bit3 ，0：不适用出租车辆， 1：适用出租车辆；
+	// bit6 ，0：不支持硬盘录像， 1：支持硬盘录像；
+	// bit7 ，0：一体机， 1：分体机。
+	TerminalType uint16
+	// 制造商
+	ManufactureID string
+	// 终端型号
+	Model string
+	// 终端ID
+	TerminalID string
+	// SIM卡号
+	Sim string
+	// 终端硬件版本
+	HardwareVersion string
+	// 终端固件版本号
+	SoftwareVersion string
+	// GNSS模块属性
+	GNSSProperty byte
+	// 通信模块属性
+	COMMProperty byte
 }
 
 func (entity *T808_0x0107) MsgID() MsgID {
@@ -60,7 +75,8 @@ func (entity *T808_0x0107) Decode(data []byte) (int, error) {
 	reader := NewReader(data)
 
 	// 读取终端类型
-	typ, err := reader.ReadUint16()
+	var err error
+	entity.TerminalType, err = reader.ReadUint16()
 	if err != nil {
 		return 0, err
 	}
@@ -70,25 +86,28 @@ func (entity *T808_0x0107) Decode(data []byte) (int, error) {
 	if err != nil {
 		return 0, err
 	}
+	entity.ManufactureID = bytesToString(manufacture)
 
 	// 读取终端型号
 	model, err := reader.Read(20)
 	if err != nil {
 		return 0, err
 	}
+	entity.Model = bytesToString(model)
 
 	// 读取终端ID
 	terminalID, err := reader.Read(7)
 	if err != nil {
 		return 0, err
 	}
+	entity.TerminalID = bytesToString(terminalID)
 
 	// 读取SIM卡号
 	temp, err := reader.Read(10)
 	if err != nil {
 		return 0, err
 	}
-	sim := bcdToString(temp)
+	entity.Sim = bcdToString(temp)
 
 	// 读取终端硬件版本号长度
 	size, err := reader.ReadByte()
@@ -101,7 +120,7 @@ func (entity *T808_0x0107) Decode(data []byte) (int, error) {
 	if err != nil {
 		return 0, err
 	}
-	hardwareVersion := bytesToString(temp)
+	entity.HardwareVersion = bytesToString(temp)
 
 	// 读取终端软件版本号长度
 	size, err = reader.ReadByte()
@@ -114,28 +133,18 @@ func (entity *T808_0x0107) Decode(data []byte) (int, error) {
 	if err != nil {
 		return 0, err
 	}
-	softwareVersion := bytesToString(temp[:size])
+	entity.SoftwareVersion = bytesToString(temp[:size])
 
 	// 读取GNSS模块属性
-	gnssProperty, err := reader.ReadByte()
+	entity.GNSSProperty, err = reader.ReadByte()
 	if err != nil {
 		return 0, err
 	}
 
 	// 读取通信模块属性
-	commProperty, err := reader.ReadByte()
+	entity.COMMProperty, err = reader.ReadByte()
 	if err != nil {
 		return 0, err
 	}
-
-	entity.TerminalType = typ
-	entity.ManufactureID = bytesToString(manufacture)
-	entity.Model = bytesToString(model)
-	entity.TerminalID = bytesToString(terminalID)
-	entity.Sim = sim
-	entity.HardwareVersion = hardwareVersion
-	entity.SoftwareVersion = softwareVersion
-	entity.GNSSProperty = gnssProperty
-	entity.COMMProperty = commProperty
 	return len(data) - reader.Len(), nil
 }

@@ -2,7 +2,9 @@ package protocol
 
 // 信息点播/取消
 type T808_0x0303 struct {
+	// 信息类型
 	Type byte
+	// 点播/ 取消标志
 	Flag T808_0x0303_Flag
 }
 

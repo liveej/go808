@@ -2,6 +2,7 @@ package protocol
 
 // 车门控制
 type T808_0x8500 struct {
+	// 控制标志
 	Flag T808_0x8500_Flag
 }
 

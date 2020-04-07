@@ -2,7 +2,9 @@ package protocol
 
 // 电子运单上报
 type T808_0x0701 struct {
-	Size    uint32
+	// 电子运单长度
+	Size uint32
+	// 电子运单内容
 	Content []byte
 }
 

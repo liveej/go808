@@ -11,7 +11,7 @@ import (
 
 func TestT808_0x0802_EncodeDecode(t *testing.T) {
 	message := protocol.T808_0x0802{
-		AnswerMessageSerialNo: 1234,
+		ReplyMsgSerialNo: 1234,
 		Items: []protocol.T808_0x0802_Item{
 			{
 				MediaID:   345,

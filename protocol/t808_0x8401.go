@@ -9,7 +9,9 @@ import (
 
 // 设置电话本
 type T808_0x8401 struct {
-	Type     T808_0x8401_Type
+	// 设置类型
+	Type T808_0x8401_Type
+	// 联系人项
 	Contacts []T808_0x8401_Contact
 }
 
@@ -29,8 +31,11 @@ var (
 
 // 电话本联系人
 type T808_0x8401_Contact struct {
-	Flag    T808_0x8401_ContactFlag
-	Number  string
+	// 标志
+	Flag T808_0x8401_ContactFlag
+	// 电话号码
+	Number string
+	// 联系人
 	Contact string
 }
 

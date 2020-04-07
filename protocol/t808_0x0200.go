@@ -74,15 +74,27 @@ func (status T808_0x0200_Status) GetLongitudeType() LongitudeType {
 
 // 汇报位置
 type T808_0x0200 struct {
-	Alarm     uint32             // 警告
-	Status    T808_0x0200_Status // 状态
-	Lat       decimal.Decimal    // 纬度
-	Lon       decimal.Decimal    // 经度
-	Altitude  uint16             // 海拔高度
-	Speed     uint16             // 速度
-	Direction uint16             // 方向
-	Time      time.Time          // 时间
-	Extras    []extra.Entity     // 附加信息
+	// 警告
+	Alarm uint32
+	// 状态
+	Status T808_0x0200_Status
+	// 纬度
+	Lat decimal.Decimal
+	// 经度
+	Lon decimal.Decimal
+	// 海拔高度
+	// 单位：米
+	Altitude uint16
+	// 速度
+	// 单位：1/10km/h
+	Speed uint16
+	// 方向
+	// 0-359，正北为 0，顺时针
+	Direction uint16
+	// 时间
+	Time time.Time
+	// 附加信息
+	Extras []extra.Entity
 }
 
 func (entity *T808_0x0200) MsgID() MsgID {
@@ -149,7 +161,8 @@ func (entity *T808_0x0200) Decode(data []byte) (int, error) {
 	reader := NewReader(data)
 
 	// 读取警告标志
-	alarm, err := reader.ReadUint32()
+	var err error
+	entity.Alarm, err = reader.ReadUint32()
 	if err != nil {
 		return 0, err
 	}
@@ -159,6 +172,7 @@ func (entity *T808_0x0200) Decode(data []byte) (int, error) {
 	if err != nil {
 		return 0, err
 	}
+	entity.Status = T808_0x0200_Status(status)
 
 	// 读取纬度信息
 	latitude, err := reader.ReadUint32()
@@ -172,26 +186,30 @@ func (entity *T808_0x0200) Decode(data []byte) (int, error) {
 		return 0, err
 	}
 
+	entity.Lat, entity.Lon = getGeoPoint(
+		latitude, entity.Status.GetLatitudeType() == SouthLatitudeType,
+		longitude, entity.Status.GetLongitudeType() == WestLongitudeType)
+
 	// 读取海拔高度
-	altitude, err := reader.ReadUint16()
+	entity.Altitude, err = reader.ReadUint16()
 	if err != nil {
 		return 0, err
 	}
 
 	// 读取行驶速度
-	speed, err := reader.ReadUint16()
+	entity.Speed, err = reader.ReadUint16()
 	if err != nil {
 		return 0, err
 	}
 
 	// 读取行驶方向
-	direction, err := reader.ReadUint16()
+	entity.Direction, err = reader.ReadUint16()
 	if err != nil {
 		return 0, err
 	}
 
 	// 读取上报时间
-	time, err := reader.ReadBcdTime()
+	entity.Time, err = reader.ReadBcdTime()
 	if err != nil {
 		return 0, err
 	}
@@ -226,16 +244,6 @@ func (entity *T808_0x0200) Decode(data []byte) (int, error) {
 		extras = append(extras, extraEntity)
 		buffer = buffer[length:]
 	}
-
-	entity.Alarm = alarm
-	entity.Status = T808_0x0200_Status(status)
-	entity.Altitude = altitude
-	entity.Speed = speed
-	entity.Direction = direction
-	entity.Time = time
-	entity.Lat, entity.Lon = getGeoPoint(
-		latitude, entity.Status.GetLatitudeType() == SouthLatitudeType,
-		longitude, entity.Status.GetLongitudeType() == WestLongitudeType)
 	if len(extras) > 0 {
 		entity.Extras = extras
 	}

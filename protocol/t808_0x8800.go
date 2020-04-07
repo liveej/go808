@@ -2,7 +2,9 @@ package protocol
 
 // 多媒体数据上传应答
 type T808_0x8800 struct {
-	MediaID  uint32
+	// 多媒体 ID
+	MediaID uint32
+	// 重传包 ID 列表
 	RetryIDs []uint16
 }
 

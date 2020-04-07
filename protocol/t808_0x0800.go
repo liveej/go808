@@ -2,10 +2,15 @@ package protocol
 
 // 多媒体事件信息上传
 type T808_0x0800 struct {
-	MediaID   uint32
-	Type      T808_0x0800_MediaType
-	Coding    T808_0x0800_MediaCoding
-	Event     byte
+	// 多媒体数据 ID
+	MediaID uint32
+	// 多媒体类型
+	Type T808_0x0800_MediaType
+	// 多媒体格式编码
+	Coding T808_0x0800_MediaCoding
+	// 事件项编码
+	Event byte
+	// 通道 ID
 	ChannelID byte
 }
 

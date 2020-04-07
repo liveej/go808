@@ -2,7 +2,10 @@ package protocol
 
 // 定位数据批量上传
 type T808_0x0704 struct {
-	Type  byte
+	// 位置数据类型
+	// 0：正常位置批量汇报， 1：盲区补报
+	Type byte
+	// 位置汇报数据项
 	Items []T808_0x0200
 }
 

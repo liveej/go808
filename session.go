@@ -65,11 +65,11 @@ func (session *Session) Send(entity protocol.Entity) (uint16, error) {
 }
 
 // 回复消息
-func (session *Session) Reply(msg *protocol.Message, result protocol.ResponseResult) (uint16, error) {
+func (session *Session) Reply(msg *protocol.Message, result protocol.Result) (uint16, error) {
 	entity := protocol.T808_0x8001{
-		AnswerMessageSerialNo: msg.Header.MessageSerialNo,
-		ResponseMsgID:         msg.Header.MsgID,
-		Result:                result,
+		ReplyMsgSerialNo: msg.Header.MessageSerialNo,
+		ReplyMsgID:       msg.Header.MsgID,
+		Result:           result,
 	}
 	return session.Send(&entity)
 }
@@ -132,13 +132,13 @@ func (session *Session) message(message *protocol.Message) {
 	switch message.Header.MsgID {
 	case protocol.MsgT808_0x0001:
 		// 终端通用应答
-		messageSerialNo = message.Body.(*protocol.T808_0x0001).AnswerMessageSerialNo
+		messageSerialNo = message.Body.(*protocol.T808_0x0001).ReplyMsgSerialNo
 	case protocol.MsgT808_0x0104:
 		// 查询终端参数应答
-		messageSerialNo = message.Body.(*protocol.T808_0x0104).AnswerMessageSerialNo
+		messageSerialNo = message.Body.(*protocol.T808_0x0104).ReplyMsgSerialNo
 	case protocol.MsgT808_0x0201:
 		// 位置信息查询应答
-		messageSerialNo = message.Body.(*protocol.T808_0x0201).AnswerMessageSerialNo
+		messageSerialNo = message.Body.(*protocol.T808_0x0201).ReplyMsgSerialNo
 	}
 	if messageSerialNo == 0 {
 		return

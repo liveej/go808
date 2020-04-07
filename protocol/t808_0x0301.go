@@ -2,6 +2,7 @@ package protocol
 
 // 事件报告
 type T808_0x0301 struct {
+	// 事件 ID
 	EventID byte
 }
 

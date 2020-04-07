@@ -13,16 +13,16 @@ func TestT808_0x8302_EncodeDecode(t *testing.T) {
 		Question: "今天星期几？",
 		CandidateAnswers: []protocol.T808_0x8302_Answer{
 			{
-				AnswerID: 1,
-				Content:  "星期一",
+				ID:      1,
+				Content: "星期一",
 			},
 			{
-				AnswerID: 2,
-				Content:  "星期二",
+				ID:      2,
+				Content: "星期二",
 			},
 			{
-				AnswerID: 3,
-				Content:  "星期三",
+				ID:      3,
+				Content: "星期三",
 			},
 		},
 	}

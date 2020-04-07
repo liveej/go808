@@ -2,13 +2,20 @@ package protocol
 
 // 终端注册
 type T808_0x0100 struct {
-	ProvinceID    uint16 // 省份
-	CityID        uint16 // 城市
-	ManufactureID string // 制造商
-	Model         string // 终端型号
-	TerminalID    string // 终端ID
-	PlateColor    byte   // 车牌颜色
-	LicenseNo     string // 车辆标识
+	// 省份
+	ProvinceID uint16
+	// 城市
+	CityID uint16
+	// 制造商
+	ManufactureID string
+	// 终端型号
+	Model string
+	// 终端ID
+	TerminalID string
+	// 车牌颜色
+	PlateColor byte
+	// 车辆标识
+	LicenseNo string
 }
 
 func (entity *T808_0x0100) MsgID() MsgID {
@@ -52,13 +59,14 @@ func (entity *T808_0x0100) Decode(data []byte) (int, error) {
 	reader := NewReader(data)
 
 	// 读取省份ID
-	province, err := reader.ReadUint16()
+	var err error
+	entity.ProvinceID, err = reader.ReadUint16()
 	if err != nil {
 		return 0, err
 	}
 
 	// 读取城市ID
-	city, err := reader.ReadUint16()
+	entity.CityID, err = reader.ReadUint16()
 	if err != nil {
 		return 0, err
 	}
@@ -68,31 +76,27 @@ func (entity *T808_0x0100) Decode(data []byte) (int, error) {
 	if err != nil {
 		return 0, err
 	}
+	entity.ManufactureID = bytesToString(manufacturer[:])
 
 	// 读取终端型号
 	model, err := reader.Read(20)
 	if err != nil {
 		return 0, err
 	}
+	entity.Model = bytesToString(model[:])
 
 	// 读取终端ID
 	terminalID, err := reader.Read(7)
 	if err != nil {
 		return 0, err
 	}
+	entity.TerminalID = bytesToString(terminalID[:])
 
 	// 读取车牌颜色
-	color, err := reader.ReadByte()
+	entity.PlateColor, err = reader.ReadByte()
 	if err != nil {
 		return 0, err
 	}
-
-	entity.ProvinceID = province
-	entity.CityID = city
-	entity.ManufactureID = bytesToString(manufacturer[:])
-	entity.Model = bytesToString(model[:])
-	entity.TerminalID = bytesToString(terminalID[:])
-	entity.PlateColor = color
 
 	// 读取车辆标识
 	if reader.Len() > 0 {

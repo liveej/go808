@@ -8,13 +8,20 @@ import (
 
 // 多媒体数据上传
 type T808_0x0801 struct {
-	MediaID   uint32
-	Type      T808_0x0800_MediaType
-	Coding    T808_0x0800_MediaCoding
-	Event     byte
+	// 多媒体 ID
+	MediaID uint32
+	// 多媒体类型
+	Type T808_0x0800_MediaType
+	// 多媒体格式编码
+	Coding T808_0x0800_MediaCoding
+	// 事件项编码
+	Event byte
+	// 通道 ID
 	ChannelID byte
-	Location  T808_0x0200
-	Packet    io.Reader
+	// 位置信息汇报
+	Location T808_0x0200
+	// 多媒体数据包
+	Packet io.Reader
 }
 
 func (entity *T808_0x0801) MsgID() MsgID {

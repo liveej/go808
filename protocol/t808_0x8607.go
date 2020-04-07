@@ -2,6 +2,7 @@ package protocol
 
 // 删除路线
 type T808_0x8607 struct {
+	// 路线ID列表
 	IDs []uint32
 }
 

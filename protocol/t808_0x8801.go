@@ -2,16 +2,28 @@ package protocol
 
 // 摄像头立即拍摄命令
 type T808_0x8801 struct {
-	ChannelID    byte
-	Cmd          uint16
-	Duration     uint16
-	Save         T808_0x8801_SaveFlag
-	Resolution   T808_0x8801_Resolution
-	Quality      byte
-	Lighting     byte
-	Contrast     byte
+	// 通道 ID
+	ChannelID byte
+	// 拍摄命令
+	// 0 表示停止拍摄； 0xFFFF 表示录像；其它表示拍照张数
+	Cmd uint16
+	// 拍照间隔/录像时间
+	// 单位：秒，0表示按最小间隔拍照或一直录像
+	Duration uint16
+	// 保存标志
+	Save T808_0x8801_SaveFlag
+	// 分辨率
+	Resolution T808_0x8801_Resolution
+	// 图像/ 视频质量
+	Quality byte
+	// 亮度
+	Lighting byte
+	// 对比度
+	Contrast byte
+	// 饱和度
 	Saturability byte
-	Chroma       byte
+	// 色度
+	Chroma byte
 }
 
 // 保存标志

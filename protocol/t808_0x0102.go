@@ -2,6 +2,7 @@ package protocol
 
 // 终端鉴权
 type T808_0x0102 struct {
+	// 鉴权码
 	AuthKey string
 }
 

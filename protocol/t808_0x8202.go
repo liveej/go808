@@ -2,8 +2,14 @@ package protocol
 
 // 临时位置跟踪控制
 type T808_0x8202 struct {
+	// 时间间隔
+	// 单位为秒 （s），0 则停止跟踪。 停止跟踪无需带后继字段
 	Interval uint16
-	Expire   uint32
+	// 位置跟踪有效期
+	// 单位为秒 （s），终端在接收到位置跟踪控制消息后，
+	// 在有效期截止时间之前，依据消息中的时间间隔发
+	// 送位置汇报
+	Expire uint32
 }
 
 func (entity *T808_0x8202) MsgID() MsgID {

@@ -9,7 +9,9 @@ import (
 
 // 位置点播菜单设置
 type T808_0x8303 struct {
-	Type  T808_0x8303_Type
+	// 设置类型
+	Type T808_0x8303_Type
+	// 信息项列表
 	Items []T808_0x8303_Item
 }
 
@@ -29,6 +31,7 @@ var (
 
 // 信息点播信息项
 type T808_0x8303_Item struct {
+	// 信息名称
 	Name string
 }
 

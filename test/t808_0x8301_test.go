@@ -12,15 +12,15 @@ func TestT808_0x8301_EncodeDecode(t *testing.T) {
 		Type: 2,
 		Events: []protocol.T808_0x8301_Event{
 			{
-				EventID: 1,
+				ID:      1,
 				Content: "事件1",
 			},
 			{
-				EventID: 2,
+				ID:      2,
 				Content: "事件2",
 			},
 			{
-				EventID: 3,
+				ID:      3,
 				Content: "事件3",
 			},
 		},

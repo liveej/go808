@@ -2,17 +2,25 @@ package protocol
 
 // 存储多媒体数据检索应答
 type T808_0x0802 struct {
-	AnswerMessageSerialNo uint16
-	Items                 []T808_0x0802_Item
+	// 应答流水号
+	ReplyMsgSerialNo uint16
+	// 检索项
+	Items []T808_0x0802_Item
 }
 
 // 多媒体检索项
 type T808_0x0802_Item struct {
-	MediaID   uint32
-	Type      T808_0x0800_MediaType
+	// 多媒体 ID
+	MediaID uint32
+	// 多媒体类型
+	Type T808_0x0800_MediaType
+	// 通道 ID
 	ChannelID byte
-	Event     byte
-	Location  T808_0x0200
+	// 事件项编码
+	// 0：平台下发指令； 1：定时动作； 2：抢劫报警触 发；3：碰撞侧翻报警触发；其他保留
+	Event byte
+	// 位置信息汇报
+	Location T808_0x0200
 }
 
 func (entity *T808_0x0802) MsgID() MsgID {
@@ -23,7 +31,7 @@ func (entity *T808_0x0802) Encode() ([]byte, error) {
 	writer := NewWriter()
 
 	// 写入应答流水号
-	writer.WriteUint16(entity.AnswerMessageSerialNo)
+	writer.WriteUint16(entity.ReplyMsgSerialNo)
 
 	// 写入多媒体检索项数
 	writer.WriteUint16(uint16(len(entity.Items)))
@@ -61,7 +69,7 @@ func (entity *T808_0x0802) Decode(data []byte) (int, error) {
 
 	// 读取应答流水号
 	var err error
-	entity.AnswerMessageSerialNo, err = reader.ReadUint16()
+	entity.ReplyMsgSerialNo, err = reader.ReadUint16()
 	if err != nil {
 		return 0, err
 	}

@@ -2,9 +2,12 @@ package protocol
 
 // 终端应答
 type T808_0x0001 struct {
-	AnswerMessageSerialNo uint16
-	ResponseMessageID     uint16
-	ResponseResult        ResponseResult
+	// 应答流水号
+	ReplyMsgSerialNo uint16
+	// 应答 ID
+	ReplyMsgID uint16
+	// 结果
+	Result Result
 }
 
 func (entity *T808_0x0001) MsgID() MsgID {
@@ -15,13 +18,13 @@ func (entity *T808_0x0001) Encode() ([]byte, error) {
 	writer := NewWriter()
 
 	// 写入消息序列号
-	writer.WriteUint16(entity.AnswerMessageSerialNo)
+	writer.WriteUint16(entity.ReplyMsgSerialNo)
 
 	// 写入响应消息ID
-	writer.WriteUint16(entity.ResponseMessageID)
+	writer.WriteUint16(entity.ReplyMsgID)
 
 	// 写入响应结果
-	writer.WriteByte(byte(entity.ResponseResult))
+	writer.WriteByte(byte(entity.Result))
 	return writer.Bytes(), nil
 }
 
@@ -32,13 +35,14 @@ func (entity *T808_0x0001) Decode(data []byte) (int, error) {
 	reader := NewReader(data)
 
 	// 读取消息序列号
-	responseMessageSerialNo, err := reader.ReadUint16()
+	var err error
+	entity.ReplyMsgSerialNo, err = reader.ReadUint16()
 	if err != nil {
 		return 0, err
 	}
 
 	// 读取响应消息ID
-	responseMessageID, err := reader.ReadUint16()
+	entity.ReplyMsgID, err = reader.ReadUint16()
 	if err != nil {
 		return 0, err
 	}
@@ -48,9 +52,6 @@ func (entity *T808_0x0001) Decode(data []byte) (int, error) {
 	if err != nil {
 		return 0, err
 	}
-
-	entity.AnswerMessageSerialNo = responseMessageSerialNo
-	entity.ResponseMessageID = responseMessageID
-	entity.ResponseResult = ResponseResult(result)
+	entity.Result = Result(result)
 	return len(data) - reader.Len(), nil
 }

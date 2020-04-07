@@ -9,13 +9,17 @@ import (
 
 // 事件设置
 type T808_0x8301 struct {
-	Type   byte
+	// 设置类型
+	Type byte
+	// 事件项列表
 	Events []T808_0x8301_Event
 }
 
 // 事件信息
 type T808_0x8301_Event struct {
-	EventID byte
+	// 事件 ID
+	ID byte
+	// 事件内容
 	Content string
 }
 
@@ -35,7 +39,7 @@ func (entity *T808_0x8301) Encode() ([]byte, error) {
 	// 写入事件列表
 	for _, event := range entity.Events {
 		// 写入事件ID
-		writer.WriteByte(event.EventID)
+		writer.WriteByte(event.ID)
 
 		// 写入内容长度
 		reader := bytes.NewReader([]byte(event.Content))
@@ -76,7 +80,7 @@ func (entity *T808_0x8301) Decode(data []byte) (int, error) {
 		var event T808_0x8301_Event
 
 		// 读取事件ID
-		event.EventID, err = reader.ReadByte()
+		event.ID, err = reader.ReadByte()
 		if err != nil {
 			return 0, err
 		}

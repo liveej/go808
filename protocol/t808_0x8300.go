@@ -2,7 +2,9 @@ package protocol
 
 // 文本信息下发
 type T808_0x8300 struct {
+	// 标志
 	Flag byte
+	// 文本信息
 	Text string
 }
 

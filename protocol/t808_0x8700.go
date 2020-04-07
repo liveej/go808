@@ -2,7 +2,9 @@ package protocol
 
 // 行驶记录数据采集命令
 type T808_0x8700 struct {
-	Cmd  byte
+	// 命令字
+	Cmd byte
+	// 数据块
 	Data []byte
 }
 

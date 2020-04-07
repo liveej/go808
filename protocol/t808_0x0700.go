@@ -2,9 +2,12 @@ package protocol
 
 // 行驶记录数据上传
 type T808_0x0700 struct {
-	AnswerMessageSerialNo uint16
-	Cmd                   byte
-	Data                  []byte
+	// 应答流水号
+	ReplyMsgSerialNo uint16
+	// 命令字
+	Cmd byte
+	// 数据块
+	Data []byte
 }
 
 func (entity *T808_0x0700) MsgID() MsgID {
@@ -15,7 +18,7 @@ func (entity *T808_0x0700) Encode() ([]byte, error) {
 	writer := NewWriter()
 
 	// 写入应答流水号
-	writer.WriteUint16(entity.AnswerMessageSerialNo)
+	writer.WriteUint16(entity.ReplyMsgSerialNo)
 
 	// 写入命令字
 	writer.WriteByte(entity.Cmd)
@@ -33,7 +36,7 @@ func (entity *T808_0x0700) Decode(data []byte) (int, error) {
 
 	// 读取应答流水号
 	var err error
-	entity.AnswerMessageSerialNo, err = reader.ReadUint16()
+	entity.ReplyMsgSerialNo, err = reader.ReadUint16()
 	if err != nil {
 		return 0, err
 	}

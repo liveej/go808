@@ -11,32 +11,15 @@ import (
 
 func TestT808_0x8604_EncodeDecode(t *testing.T) {
 	message := protocol.T808_0x8604{
-		Action: protocol.AreaActionAdd,
-		Items: []protocol.PolygonArea{
-			{
-				ID:        1,
-				Attribute: 1,
-				StartTime: time.Unix(time.Now().Unix(), 0),
-				EndTime:   time.Unix(time.Now().Unix(), 0),
-				MaxSpeed:  1024,
-				Duration:  60,
-				Vertexes: []protocol.Vertex{
-					{Lat: decimal.NewFromFloat(123.234561), Lon: decimal.NewFromFloat(-23.432567)},
-					{Lat: decimal.NewFromFloat(23.341098), Lon: decimal.NewFromFloat(-12.213435)},
-				},
-			},
-			{
-				ID:        1,
-				Attribute: 1,
-				StartTime: time.Unix(time.Now().Unix(), 0),
-				EndTime:   time.Unix(time.Now().Unix(), 0),
-				MaxSpeed:  1024,
-				Duration:  60,
-				Vertexes: []protocol.Vertex{
-					{Lat: decimal.NewFromFloat(123.234561), Lon: decimal.NewFromFloat(-23.432567)},
-					{Lat: decimal.NewFromFloat(23.341098), Lon: decimal.NewFromFloat(-12.213435)},
-				},
-			},
+		ID:        1,
+		Attribute: 1,
+		StartTime: time.Unix(time.Now().Unix(), 0),
+		EndTime:   time.Unix(time.Now().Unix(), 0),
+		MaxSpeed:  1024,
+		Duration:  60,
+		Vertexes: []protocol.Vertex{
+			{Lat: decimal.NewFromFloat(123.234561), Lon: decimal.NewFromFloat(-23.432567)},
+			{Lat: decimal.NewFromFloat(23.341098), Lon: decimal.NewFromFloat(-12.213435)},
 		},
 	}
 	data, err := message.Encode()

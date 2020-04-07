@@ -56,21 +56,32 @@ var (
 
 // 圆形区域
 type CircleArea struct {
-	ID        uint32
+	// 区域ID
+	ID uint32
+	// 区域属性
 	Attribute AreaAttribute
-	Lat       decimal.Decimal
-	Lon       decimal.Decimal
-	Radius    uint32
+	// 中心点纬度
+	Lat decimal.Decimal
+	// 中心点经度
+	Lon decimal.Decimal
+	// 半径
+	Radius uint32
+	// 起始时间
 	StartTime time.Time
-	EndTime   time.Time
-	MaxSpeed  uint16
-	Duration  byte
+	// 结束时间
+	EndTime time.Time
+	// 最高速度
+	MaxSpeed uint16
+	// 超速持续时间
+	Duration byte
 }
 
 // 设置圆形区域
 type T808_0x8600 struct {
+	// 设置属性
 	Action AreaAction
-	Items  []CircleArea
+	// 区域项
+	Items []CircleArea
 }
 
 func (entity *T808_0x8600) MsgID() MsgID {

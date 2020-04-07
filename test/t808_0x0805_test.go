@@ -8,8 +8,8 @@ import (
 
 func TestT808_0x0805_EncodeDecode(t *testing.T) {
 	message := protocol.T808_0x0805{
-		AnswerMessageSerialNo: 2342,
-		Result:                protocol.T808_0x0805_ResultNotSupported,
+		ReplyMsgSerialNo: 2342,
+		Result:           protocol.T808_0x0805_ResultNotSupported,
 		MediaIDs: []uint32{
 			1232313,
 			213214,

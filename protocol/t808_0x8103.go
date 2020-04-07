@@ -2,6 +2,7 @@ package protocol
 
 // 设置终端参数
 type T808_0x8103 struct {
+	// 参数项列表
 	Params []*Param
 }
 

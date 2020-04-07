@@ -8,22 +8,34 @@ import (
 
 // 矩形区域
 type RectArea struct {
-	ID             uint32
-	Attribute      AreaAttribute
-	LeftTopLat     decimal.Decimal
-	LeftTopLon     decimal.Decimal
+	// 区域ID
+	ID uint32
+	// 区域属性
+	Attribute AreaAttribute
+	// 左上点纬度
+	LeftTopLat decimal.Decimal
+	// 左上点经度
+	LeftTopLon decimal.Decimal
+	// 右下点纬度
 	RightBottomLat decimal.Decimal
+	// 右下点经度
 	RightBottomLon decimal.Decimal
-	StartTime      time.Time
-	EndTime        time.Time
-	MaxSpeed       uint16
-	Duration       byte
+	// 起始时间
+	StartTime time.Time
+	// 结束时间
+	EndTime time.Time
+	// 最高速度
+	MaxSpeed uint16
+	// 超速持续时间
+	Duration byte
 }
 
 // 设置矩形区域
 type T808_0x8602 struct {
+	// 设置属性
 	Action AreaAction
-	Items  []RectArea
+	// 区域项
+	Items []RectArea
 }
 
 func (entity *T808_0x8602) MsgID() MsgID {

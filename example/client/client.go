@@ -159,7 +159,7 @@ func onMessageReceived(conn *net.TCPConn, waitGroup *sync.WaitGroup) {
 					MessageSerialNo: 1000,
 				},
 				Body: &protocol.T808_0x0104{
-					AnswerMessageSerialNo: message.Header.MessageSerialNo,
+					ReplyMsgSerialNo: message.Header.MessageSerialNo,
 					Params: []*protocol.Param{
 						new(protocol.Param).SetByte(0x0084, 24),
 						new(protocol.Param).SetBytes(0x0110, []byte{1, 2, 3, 4, 5, 6, 7, 8}),

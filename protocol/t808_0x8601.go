@@ -2,6 +2,7 @@ package protocol
 
 // 删除圆形区域
 type T808_0x8601 struct {
+	// 区域ID列表
 	IDs []uint32
 }
 

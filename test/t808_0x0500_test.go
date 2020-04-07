@@ -12,7 +12,7 @@ import (
 func TestT808_0x0500_EncodeDecode(t *testing.T) {
 	areaID := uint32(121313)
 	message := protocol.T808_0x0500{
-		AnswerMessageSerialNo: 123,
+		ReplyMsgSerialNo: 123,
 		Result: protocol.T808_0x0200{
 			Alarm:     2342,
 			Status:    0,

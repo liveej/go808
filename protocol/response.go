@@ -1,7 +1,7 @@
 package protocol
 
 // 应答结果
-type ResponseResult byte
+type Result byte
 
 const (
 	// 成功/确认

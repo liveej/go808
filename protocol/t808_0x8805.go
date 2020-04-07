@@ -2,7 +2,9 @@ package protocol
 
 // 单条存储多媒体数据检索上传命令
 type T808_0x8805 struct {
-	MediaID    uint32
+	// 多媒体 ID
+	MediaID uint32
+	// 删除标志
 	RemoveFlag byte
 }
 

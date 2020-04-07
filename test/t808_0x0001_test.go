@@ -9,9 +9,9 @@ import (
 
 func TestT808_0x0001_EncodeDecode(t *testing.T) {
 	message := protocol.T808_0x0001{
-		AnswerMessageSerialNo: 1024,
-		ResponseMessageID:     123,
-		ResponseResult:        protocol.T808_0x8001ResultSuccess,
+		ReplyMsgSerialNo: 1024,
+		ReplyMsgID:       123,
+		Result:           protocol.T808_0x8001ResultSuccess,
 	}
 	data, err := message.Encode()
 	if err != nil {

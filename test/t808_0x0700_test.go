@@ -9,9 +9,9 @@ import (
 
 func TestT808_0x0700_EncodeDecode(t *testing.T) {
 	message := protocol.T808_0x0700{
-		AnswerMessageSerialNo: 1,
-		Cmd:                   26,
-		Data:                  []byte{1, 3, 5, 7, 9},
+		ReplyMsgSerialNo: 1,
+		Cmd:              26,
+		Data:             []byte{1, 3, 5, 7, 9},
 	}
 	data, err := message.Encode()
 	if err != nil {

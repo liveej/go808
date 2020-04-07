@@ -9,11 +9,17 @@ import (
 
 // 下发终端升级包
 type T808_0x8108 struct {
-	Type          byte
+	// 升级类型
+	// 0：终端， 12：道路运输证 IC 卡读卡器， 52：北斗卫星定位模块
+	Type byte
+	// 制造商 ID
 	ManufactureID string
-	Version       string
-	Size          uint32
-	Data          []byte
+	// 版本号
+	Version string
+	// 升级数据包长度
+	Size uint32
+	// 升级包数据
+	Data []byte
 }
 
 func (entity *T808_0x8108) MsgID() MsgID {

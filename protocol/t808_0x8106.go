@@ -2,6 +2,7 @@ package protocol
 
 // 查询终端参数
 type T808_0x8106 struct {
+	// 参数 ID 列表
 	Params []uint32
 }
 

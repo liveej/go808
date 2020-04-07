@@ -2,9 +2,13 @@ package protocol
 
 // 摄像头立即拍摄命令应答
 type T808_0x0805 struct {
-	AnswerMessageSerialNo uint16
-	Result                T808_0x0805_Result
-	MediaIDs              []uint32
+	// 应答流水号
+	ReplyMsgSerialNo uint16
+	// 结果
+	// 0：成功； 1：失败； 2：通道不支持。
+	Result T808_0x0805_Result
+	// 多媒体 ID 个数
+	MediaIDs []uint32
 }
 
 // 处理结果
@@ -27,7 +31,7 @@ func (entity *T808_0x0805) Encode() ([]byte, error) {
 	writer := NewWriter()
 
 	// 写入应答流水号
-	writer.WriteUint16(entity.AnswerMessageSerialNo)
+	writer.WriteUint16(entity.ReplyMsgSerialNo)
 
 	// 写入处理结果
 	writer.WriteByte(byte(entity.Result))
@@ -50,7 +54,7 @@ func (entity *T808_0x0805) Decode(data []byte) (int, error) {
 
 	// 读取应答流水号
 	var err error
-	entity.AnswerMessageSerialNo, err = reader.ReadUint16()
+	entity.ReplyMsgSerialNo, err = reader.ReadUint16()
 	if err != nil {
 		return 0, err
 	}

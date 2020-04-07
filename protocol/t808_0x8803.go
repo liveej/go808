@@ -4,11 +4,19 @@ import "time"
 
 // 存储多媒体数据上传命令
 type T808_0x8803 struct {
-	Type       T808_0x0800_MediaType
-	ChannelID  byte
-	Event      byte
-	StartTime  time.Time
-	EndTime    time.Time
+	// 多媒体类型
+	Type T808_0x0800_MediaType
+	// 通道 ID
+	ChannelID byte
+	// 事件项编码
+	// 0：平台下发指令； 1：定时动作； 2：抢劫报警触发；3：碰撞侧翻报警触发；其他保留
+	Event byte
+	// 起始时间
+	StartTime time.Time
+	// 结束时间
+	EndTime time.Time
+	// 删除标志
+	// 0：保留； 1：删除
 	RemoveFlag byte
 }
 

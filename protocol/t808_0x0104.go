@@ -2,8 +2,10 @@ package protocol
 
 // 查询终端参数应答
 type T808_0x0104 struct {
-	AnswerMessageSerialNo uint16
-	Params                []*Param
+	// 应答流水号
+	ReplyMsgSerialNo uint16
+	// 参数项列表
+	Params []*Param
 }
 
 func (entity *T808_0x0104) MsgID() MsgID {
@@ -14,7 +16,7 @@ func (entity *T808_0x0104) Encode() ([]byte, error) {
 	writer := NewWriter()
 
 	// 写入消息序列号
-	writer.WriteUint16(entity.AnswerMessageSerialNo)
+	writer.WriteUint16(entity.ReplyMsgSerialNo)
 
 	// 写入参数个数
 	writer.WriteByte(byte(len(entity.Params)))
@@ -44,6 +46,7 @@ func (entity *T808_0x0104) Decode(data []byte) (int, error) {
 	if err != nil {
 		return 0, err
 	}
+	entity.ReplyMsgSerialNo = responseMessageSerialNo
 
 	// 读取参数个数
 	paramNums, err := reader.ReadByte()
@@ -52,7 +55,7 @@ func (entity *T808_0x0104) Decode(data []byte) (int, error) {
 	}
 
 	// 读取参数信息
-	params := make([]*Param, 0, paramNums)
+	entity.Params = make([]*Param, 0, paramNums)
 	for i := 0; i < int(paramNums); i++ {
 		// 读取参数ID
 		id, err := reader.ReadUint32()
@@ -71,13 +74,10 @@ func (entity *T808_0x0104) Decode(data []byte) (int, error) {
 		if err != nil {
 			return 0, err
 		}
-		params = append(params, &Param{
+		entity.Params = append(entity.Params, &Param{
 			id:         id,
 			serialized: value,
 		})
 	}
-
-	entity.Params = params
-	entity.AnswerMessageSerialNo = responseMessageSerialNo
 	return len(data) - reader.Len(), nil
 }

@@ -2,7 +2,9 @@ package protocol
 
 // 终端控制
 type T808_0x8105 struct {
-	Cmd  T808_0x8105_Command
+	// 命令字
+	Cmd T808_0x8105_Command
+	// 命令参数
 	Data string
 }
 

@@ -2,9 +2,15 @@ package protocol
 
 // 录音开始命令
 type T808_0x8804 struct {
-	Cmd             byte
-	Duration        uint16
-	Save            T808_0x8801_SaveFlag
+	// 录音命令
+	// 0：停止录音； 0x01：开始录音
+	Cmd byte
+	// 录音时间
+	// 单位为秒（ s），0表示一直录音
+	Duration uint16
+	// 保存标志
+	Save T808_0x8801_SaveFlag
+	// 音频采样率
 	AudioSampleRate T808_0x8804_AudioSampleRate
 }
 

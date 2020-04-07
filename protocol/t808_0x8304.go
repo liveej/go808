@@ -9,7 +9,9 @@ import (
 
 // 信息服务
 type T808_0x8304 struct {
-	Type    byte
+	// 信息类型
+	Type byte
+	// 信息内容
 	Content string
 }
 

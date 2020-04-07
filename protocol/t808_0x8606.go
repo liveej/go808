@@ -8,11 +8,16 @@ import (
 
 // 设置路线
 type T808_0x8606 struct {
-	ID        uint32
+	// 路线 ID
+	ID uint32
+	// 路线属性
 	Attribute uint16
+	// 起始时间
 	StartTime time.Time
-	EndTime   time.Time
-	Points    []T808_0x8606_Point
+	// 结束时间
+	EndTime time.Time
+	// 拐点项
+	Points []T808_0x8606_Point
 }
 
 // 路段属性
@@ -66,15 +71,25 @@ func (attr T808_0x8606_SectionAttribute) GetLongitudeType() LongitudeType {
 
 // 路线拐点
 type T808_0x8606_Point struct {
-	ID                uint32
-	SectionID         uint32
-	Lat               decimal.Decimal
-	Lon               decimal.Decimal
-	Width             byte
-	Attribute         T808_0x8606_SectionAttribute
-	TimeTooLong       *uint16
-	TimeTooShort      *uint16
-	MaxSpeed          *uint16
+	// 拐点 ID
+	ID uint32
+	// 路段 ID
+	SectionID uint32
+	// 拐点纬度
+	Lat decimal.Decimal
+	// 拐点经度
+	Lon decimal.Decimal
+	// 路段宽度
+	Width byte
+	// 路段属性
+	Attribute T808_0x8606_SectionAttribute
+	// 路段行驶过长阈值
+	TimeTooLong *uint16
+	// 路段行驶过短阈值
+	TimeTooShort *uint16
+	// 路段最高速度
+	MaxSpeed *uint16
+	// 路段超速持续时间
 	OverSpeedDuration *byte
 }
 

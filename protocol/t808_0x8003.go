@@ -2,8 +2,10 @@ package protocol
 
 // 补传分包请求
 type T808_0x8003 struct {
+	// 原始消息流水号
 	MessageSerialNo uint16
-	PacketIDs       []uint16
+	// 重传包 ID 列表
+	PacketIDs []uint16
 }
 
 func (entity *T808_0x8003) MsgID() MsgID {

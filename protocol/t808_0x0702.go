@@ -10,13 +10,28 @@ import (
 
 // 驾驶员身份信息采集上报
 type T808_0x0702 struct {
-	State        byte
-	Time         time.Time
+	// 状态
+	// 0x01：从业资格证 IC 卡插入（驾驶员上班）
+	// 0x02：从业资格证 IC 卡拔出（驾驶员下班）
+	State byte
+	// 时间
+	Time time.Time
+	// IC 卡读取结果
+	// 0x00：IC 卡读卡成功
+	//0x01：读卡失败，原因为卡片密钥认证未通过
+	//0x02：读卡失败，原因为卡片已被锁定
+	//0x03：读卡失败，原因为卡片被拔出
+	//0x04：读卡失败，原因为数据校验错误
+	//以下字段在 IC 卡读取结果等于 0x00 时才有效
 	ICCardResult byte
-	DriverName   string
-	Number       string
-	CompanyName  string
-	ExpiryDate   time.Time
+	// 驾驶员姓名
+	DriverName string
+	// 从业资格证编码
+	Number string
+	// 发证机构名称
+	CompanyName string
+	// 证件有效期
+	ExpiryDate time.Time
 }
 
 func (entity *T808_0x0702) MsgID() MsgID {

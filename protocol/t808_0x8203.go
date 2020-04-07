@@ -2,8 +2,10 @@ package protocol
 
 // 人工确认报警消息
 type T808_0x8203 struct {
+	// 报警消息流水号
 	MessageSerialNo uint16
-	Type            uint32
+	// 人工确认报警类型
+	Type uint32
 }
 
 func (entity *T808_0x8203) MsgID() MsgID {

@@ -2,8 +2,10 @@ package protocol
 
 // 位置信息查询应答
 type T808_0x0201 struct {
-	AnswerMessageSerialNo uint16
-	Result                T808_0x0200
+	// 应答流水号
+	ReplyMsgSerialNo uint16
+	// 位置信息汇报
+	Result T808_0x0200
 }
 
 func (entity *T808_0x0201) MsgID() MsgID {
@@ -14,7 +16,7 @@ func (entity *T808_0x0201) Encode() ([]byte, error) {
 	writer := NewWriter()
 
 	// 写入消息序列号
-	writer.WriteUint16(entity.AnswerMessageSerialNo)
+	writer.WriteUint16(entity.ReplyMsgSerialNo)
 
 	// 写入定位信息
 	data, err := entity.Result.Encode()
@@ -46,6 +48,6 @@ func (entity *T808_0x0201) Decode(data []byte) (int, error) {
 
 	// 更新Entity信息
 	entity.Result = result
-	entity.AnswerMessageSerialNo = responseMessageSerialNo
+	entity.ReplyMsgSerialNo = responseMessageSerialNo
 	return len(data) - reader.Len() + size, nil
 }
