@@ -9,8 +9,8 @@ import (
 
 func TestT808_0x8203_EncodeDecode(t *testing.T) {
 	message := protocol.T808_0x8203{
-		MessageSerialNo: 1024,
-		Type:            1231,
+		MsgSerialNo: 1024,
+		Type:        1231,
 	}
 	data, err := message.Encode()
 	if err != nil {

@@ -13,11 +13,11 @@ type Packet struct {
 
 // 消息头
 type Header struct {
-	MsgID           MsgID
-	Property        Property
-	IccID           uint64
-	MessageSerialNo uint16
-	Packet          *Packet
+	MsgID       MsgID
+	Property    Property
+	IccID       uint64
+	MsgSerialNo uint16
+	Packet      *Packet
 }
 
 // 协议编码
@@ -29,7 +29,7 @@ func (header *Header) Encode() ([]byte, error) {
 
 	// 写入消息体属性
 	if header.Packet != nil {
-		header.Property.setPacket()
+		header.Property.enablePacket()
 	}
 	writer.WriteUint16(uint16(header.Property))
 
@@ -37,10 +37,10 @@ func (header *Header) Encode() ([]byte, error) {
 	writer.Write(stringToBCD(strconv.FormatUint(header.IccID, 10), 6))
 
 	// 写入消息流水号
-	writer.WriteUint16(header.MessageSerialNo)
+	writer.WriteUint16(header.MsgSerialNo)
 
 	// 写入分包信息
-	if header.Property.IsPacket() {
+	if header.Property.IsEnablePacket() {
 		writer.WriteUint16(header.Packet.Sum)
 		writer.WriteUint16(header.Packet.Seq)
 	}
@@ -83,7 +83,7 @@ func (header *Header) Decode(data []byte) error {
 	}
 
 	// 读取分包信息
-	if Property(property).IsPacket() {
+	if Property(property).IsEnablePacket() {
 		var packet Packet
 
 		// 读取分包总数
@@ -103,6 +103,6 @@ func (header *Header) Decode(data []byte) error {
 	header.MsgID = MsgID(msgID)
 	header.IccID = iccID
 	header.Property = Property(property)
-	header.MessageSerialNo = serialNo
+	header.MsgSerialNo = serialNo
 	return nil
 }

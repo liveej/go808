@@ -23,4 +23,6 @@ var (
 	ErrTypeNotRegistered = errors.New("entity not registered")
 	// 附加信息长度错误
 	ErrInvalidExtraLength = errors.New("invalid extra length")
+	// 消息解密失败
+	ErrDecryptMessageFailed = errors.New("decrypt message failed")
 )

@@ -57,7 +57,7 @@ func handleReportLocation(session *go808.Session, message *protocol.Message) {
 }
 
 func main() {
-	server := go808.NewServer(go808.Options{
+	server, _ := go808.NewServer(go808.Options{
 		Keepalive:       60,
 	})
 	server.AddHandler(protocol.MsgT808_0x0200, handleReportLocation)
@@ -91,7 +91,7 @@ func handleAuthentication(session *go808.Session, message *protocol.Message) {
 }
 
 func main() {
-	server := go808.NewServer(go808.Options{
+	server, _ := go808.NewServer(go808.Options{
 		Keepalive:       60,
 	})
 	server.AddHandler(protocol.MsgT808_0x0200, handleAuthentication)
@@ -123,7 +123,7 @@ func handleUploadMediaPacket(session *go808.Session, message *protocol.Message) 
 }
 
 func main() {
-	server := go808.NewServer(go808.Options{
+	server, _ := go808.NewServer(go808.Options{
 		Keepalive:       60,
 		AutoMergePacket: true, // 自动合并分包
 	})
@@ -202,5 +202,5 @@ TODO...
 | 0x8900        |数据下行透传                  | √         |
 | 0x0900        |数据上行透传                  | √         |
 | 0x0901        |数据压缩上报                  | √         |
-| 0x8A00        |平台 RSA 公钥                 | x         |
-| 0x0A00        |终端 RSA 公钥                 | x         |
+| 0x8A00        |平台 RSA 公钥                 | √         |
+| 0x0A00        |终端 RSA 公钥                 | √         |

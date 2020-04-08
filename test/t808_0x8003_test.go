@@ -9,7 +9,7 @@ import (
 
 func TestT808_0x8003_EncodeDecode(t *testing.T) {
 	message := protocol.T808_0x8003{
-		MessageSerialNo: 1234,
+		MsgSerialNo: 1234,
 		PacketIDs: []uint16{
 			123,
 			345,

@@ -3,7 +3,7 @@ package protocol
 // 人工确认报警消息
 type T808_0x8203 struct {
 	// 报警消息流水号
-	MessageSerialNo uint16
+	MsgSerialNo uint16
 	// 人工确认报警类型
 	Type uint32
 }
@@ -16,7 +16,7 @@ func (entity *T808_0x8203) Encode() ([]byte, error) {
 	writer := NewWriter()
 
 	// 写入消息序列号
-	writer.WriteUint16(entity.MessageSerialNo)
+	writer.WriteUint16(entity.MsgSerialNo)
 
 	// 写入报警类型
 	writer.WriteUint32(entity.Type)
@@ -31,7 +31,7 @@ func (entity *T808_0x8203) Decode(data []byte) (int, error) {
 
 	// 读取消息序列号
 	var err error
-	entity.MessageSerialNo, err = reader.ReadUint16()
+	entity.MsgSerialNo, err = reader.ReadUint16()
 	if err != nil {
 		return 0, err
 	}

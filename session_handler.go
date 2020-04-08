@@ -45,7 +45,7 @@ func (handler sessionHandler) HandleSession(sess *link.Session) {
 			continue
 		}
 
-		if !handler.autoMergePacket || !message.Header.Property.IsPacket() {
+		if !handler.autoMergePacket || !message.Header.Property.IsEnablePacket() {
 			session.message(&message)
 			handler.server.dispatchMessage(session, &message)
 			continue

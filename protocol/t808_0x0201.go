@@ -34,7 +34,7 @@ func (entity *T808_0x0201) Decode(data []byte) (int, error) {
 	reader := NewReader(data)
 
 	// 读取消息序列号
-	responseMessageSerialNo, err := reader.ReadUint16()
+	responseMsgSerialNo, err := reader.ReadUint16()
 	if err != nil {
 		return 0, err
 	}
@@ -48,6 +48,6 @@ func (entity *T808_0x0201) Decode(data []byte) (int, error) {
 
 	// 更新Entity信息
 	entity.Result = result
-	entity.ReplyMsgSerialNo = responseMessageSerialNo
+	entity.ReplyMsgSerialNo = responseMsgSerialNo
 	return len(data) - reader.Len() + size, nil
 }

@@ -2,6 +2,7 @@ package go808
 
 import (
 	"bytes"
+	"crypto/rsa"
 	"encoding/hex"
 	"fmt"
 	"github.com/funny/link"
@@ -11,13 +12,16 @@ import (
 	"io"
 )
 
-type Protocol struct{}
+type Protocol struct {
+	privateKey *rsa.PrivateKey
+}
 
 // 创建编解码器
-func (Protocol) NewCodec(rw io.ReadWriter) (link.Codec, error) {
+func (p Protocol) NewCodec(rw io.ReadWriter) (link.Codec, error) {
 	codec := &ProtocolCodec{
 		w:               rw,
 		r:               rw,
+		privateKey:      p.privateKey,
 		bufferReceiving: bytes.NewBuffer(nil),
 	}
 	codec.closer, _ = rw.(io.Closer)
@@ -29,7 +33,19 @@ type ProtocolCodec struct {
 	w               io.Writer
 	r               io.Reader
 	closer          io.Closer
+	publicKey       *rsa.PublicKey
+	privateKey      *rsa.PrivateKey
 	bufferReceiving *bytes.Buffer
+}
+
+// 获取RSA公钥
+func (codec *ProtocolCodec) GetPublicKey() *rsa.PublicKey {
+	return codec.publicKey
+}
+
+// 设置RSA公钥
+func (codec *ProtocolCodec) SetPublicKey(publicKey *rsa.PublicKey) {
+	codec.publicKey = publicKey
 }
 
 // 关闭读写
@@ -50,7 +66,13 @@ func (codec *ProtocolCodec) Send(msg interface{}) error {
 		return errors.ErrInvalidMessage
 	}
 
-	data, err := message.Encode()
+	var err error
+	var data []byte
+	if codec.publicKey == nil || !message.Header.Property.IsEnableEncrypt() {
+		data, err = message.Encode()
+	} else {
+		data, err = message.Encode(codec.publicKey)
+	}
 	if err != nil {
 		log.WithFields(log.Fields{
 			"id":     fmt.Sprintf("0x%x", message.Header.MsgID),
@@ -123,7 +145,7 @@ func (codec *ProtocolCodec) Receive() (interface{}, error) {
 		}
 
 		var message protocol.Message
-		if err = message.Decode(data[:i+1]); err != nil {
+		if err = message.Decode(data[:i+1], codec.privateKey); err != nil {
 			codec.bufferReceiving.Next(i + 1)
 			log.WithFields(log.Fields{
 				"data":   fmt.Sprintf("0x%x", hex.EncodeToString(data[:i+1])),

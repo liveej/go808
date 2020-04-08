@@ -35,7 +35,7 @@ func (entity *T808_0x8001) Decode(data []byte) (int, error) {
 	reader := NewReader(data)
 
 	// 读取流水号
-	messageSerialNo, err := reader.ReadUint16()
+	msgSerialNo, err := reader.ReadUint16()
 	if err != nil {
 		return 0, err
 	}
@@ -54,6 +54,6 @@ func (entity *T808_0x8001) Decode(data []byte) (int, error) {
 
 	entity.ReplyMsgID = MsgID(msgID)
 	entity.Result = Result(b)
-	entity.ReplyMsgSerialNo = messageSerialNo
+	entity.ReplyMsgSerialNo = msgSerialNo
 	return len(data) - reader.Len(), nil
 }

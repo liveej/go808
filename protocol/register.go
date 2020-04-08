@@ -130,6 +130,10 @@ const (
 	MsgT808_0x0900 MsgID = 0x0900
 	// 数据压缩上报
 	MsgT808_0x0901 MsgID = 0x0901
+	// 终端 RSA公钥
+	MsgT808_0x0A00 MsgID = 0x0a00
+	// 平台 RSA公钥
+	MsgT808_0x8A00 MsgID = 0x8a00
 )
 
 // 消息实体映射
@@ -322,6 +326,12 @@ var entityMapper = map[uint16]func() Entity{
 	},
 	uint16(MsgT808_0x0901): func() Entity {
 		return new(T808_0x0901)
+	},
+	uint16(MsgT808_0x0A00): func() Entity {
+		return new(T808_0x0A00)
+	},
+	uint16(MsgT808_0x8A00): func() Entity {
+		return new(T808_0x8A00)
 	},
 }
 

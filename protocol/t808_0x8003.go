@@ -3,7 +3,7 @@ package protocol
 // 补传分包请求
 type T808_0x8003 struct {
 	// 原始消息流水号
-	MessageSerialNo uint16
+	MsgSerialNo uint16
 	// 重传包 ID 列表
 	PacketIDs []uint16
 }
@@ -16,7 +16,7 @@ func (entity *T808_0x8003) Encode() ([]byte, error) {
 	writer := NewWriter()
 
 	// 写入原始消息流水号
-	writer.WriteUint16(entity.MessageSerialNo)
+	writer.WriteUint16(entity.MsgSerialNo)
 
 	// 写入重传包总数
 	writer.WriteByte(byte(len(entity.PacketIDs)))
@@ -36,7 +36,7 @@ func (entity *T808_0x8003) Decode(data []byte) (int, error) {
 
 	// 读取原始消息流水号
 	var err error
-	entity.MessageSerialNo, err = reader.ReadUint16()
+	entity.MsgSerialNo, err = reader.ReadUint16()
 	if err != nil {
 		return 0, err
 	}

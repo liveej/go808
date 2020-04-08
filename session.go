@@ -1,6 +1,7 @@
 package go808
 
 import (
+	"crypto/rsa"
 	"github.com/funny/link"
 	log "github.com/sirupsen/logrus"
 	"go808/protocol"
@@ -16,6 +17,7 @@ type requestContext struct {
 	callback func(answer *protocol.Message)
 }
 
+// 终端会话
 type Session struct {
 	next    uint32
 	iccID   uint64
@@ -46,14 +48,32 @@ func (session *Session) GetServer() *Server {
 	return session.server
 }
 
+// 获取RSA公钥
+func (session *Session) GetPublicKey() *rsa.PublicKey {
+	codec, ok := session.session.Codec().(*ProtocolCodec)
+	if !ok || codec == nil {
+		return nil
+	}
+	return codec.GetPublicKey()
+}
+
+// 设置RSA公钥
+func (session *Session) SetPublicKey(publicKey *rsa.PublicKey) {
+	codec, ok := session.session.Codec().(*ProtocolCodec)
+	if !ok || codec == nil {
+		return
+	}
+	codec.SetPublicKey(publicKey)
+}
+
 // 发送消息
 func (session *Session) Send(entity protocol.Entity) (uint16, error) {
 	message := protocol.Message{
 		Body: entity,
 		Header: protocol.Header{
-			MsgID:           entity.MsgID(),
-			IccID:           atomic.LoadUint64(&session.iccID),
-			MessageSerialNo: session.getNextID(),
+			MsgID:       entity.MsgID(),
+			IccID:       atomic.LoadUint64(&session.iccID),
+			MsgSerialNo: session.nextID(),
 		},
 	}
 
@@ -61,13 +81,13 @@ func (session *Session) Send(entity protocol.Entity) (uint16, error) {
 	if err != nil {
 		return 0, err
 	}
-	return message.Header.MessageSerialNo, nil
+	return message.Header.MsgSerialNo, nil
 }
 
 // 回复消息
 func (session *Session) Reply(msg *protocol.Message, result protocol.Result) (uint16, error) {
 	entity := protocol.T808_0x8001{
-		ReplyMsgSerialNo: msg.Header.MessageSerialNo,
+		ReplyMsgSerialNo: msg.Header.MsgSerialNo,
 		ReplyMsgID:       msg.Header.MsgID,
 		Result:           result,
 	}
@@ -97,7 +117,7 @@ func (session *Session) Close() error {
 }
 
 // 获取消息ID
-func (session *Session) getNextID() uint16 {
+func (session *Session) nextID() uint16 {
 	var id uint32
 	for {
 		id = atomic.LoadUint32(&session.next)
@@ -128,23 +148,38 @@ func (session *Session) message(message *protocol.Message) {
 		atomic.StoreUint64(&session.iccID, message.Header.IccID)
 	}
 
-	var messageSerialNo uint16
+	var msgSerialNo uint16
 	switch message.Header.MsgID {
 	case protocol.MsgT808_0x0001:
 		// 终端通用应答
-		messageSerialNo = message.Body.(*protocol.T808_0x0001).ReplyMsgSerialNo
+		msgSerialNo = message.Body.(*protocol.T808_0x0001).ReplyMsgSerialNo
 	case protocol.MsgT808_0x0104:
 		// 查询终端参数应答
-		messageSerialNo = message.Body.(*protocol.T808_0x0104).ReplyMsgSerialNo
+		msgSerialNo = message.Body.(*protocol.T808_0x0104).ReplyMsgSerialNo
 	case protocol.MsgT808_0x0201:
 		// 位置信息查询应答
-		messageSerialNo = message.Body.(*protocol.T808_0x0201).ReplyMsgSerialNo
+		msgSerialNo = message.Body.(*protocol.T808_0x0201).ReplyMsgSerialNo
+	case protocol.MsgT808_0x0302:
+		// 提问应答
+		msgSerialNo = message.Body.(*protocol.T808_0x0302).ReplyMsgSerialNo
+	case protocol.MsgT808_0x0500:
+		// 车辆控制应答
+		msgSerialNo = message.Body.(*protocol.T808_0x0500).ReplyMsgSerialNo
+	case protocol.MsgT808_0x0700:
+		// 行驶记录数据上传
+		msgSerialNo = message.Body.(*protocol.T808_0x0700).ReplyMsgSerialNo
+	case protocol.MsgT808_0x0802:
+		// 存储多媒体数据检索应答
+		msgSerialNo = message.Body.(*protocol.T808_0x0802).ReplyMsgSerialNo
+	case protocol.MsgT808_0x0805:
+		// 摄像头立即拍摄命令应答
+		msgSerialNo = message.Body.(*protocol.T808_0x0805).ReplyMsgSerialNo
 	}
-	if messageSerialNo == 0 {
+	if msgSerialNo == 0 {
 		return
 	}
 
-	ctx, ok := session.takeRequestContext(messageSerialNo)
+	ctx, ok := session.takeRequestContext(msgSerialNo)
 	if ok {
 		defer func() {
 			if err := recover(); err != nil {
@@ -170,12 +205,12 @@ func (session *Session) addRequestContext(ctx requestContext) {
 }
 
 // 取出请求上下文
-func (session *Session) takeRequestContext(messageSerialNo uint16) (requestContext, bool) {
+func (session *Session) takeRequestContext(msgSerialNo uint16) (requestContext, bool) {
 	session.mux.Lock()
 	defer session.mux.Unlock()
 
 	for idx, item := range session.requests {
-		if item.serialNo == messageSerialNo {
+		if item.serialNo == msgSerialNo {
 			session.requests[idx] = session.requests[len(session.requests)-1]
 			session.requests = session.requests[:len(session.requests)-1]
 			return item, true

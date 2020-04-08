@@ -2,6 +2,9 @@ package protocol
 
 import (
 	"bytes"
+	"crypto/rand"
+	"crypto/rsa"
+	"crypto/sha1"
 	"fmt"
 	log "github.com/sirupsen/logrus"
 	"go808/errors"
@@ -15,7 +18,7 @@ type Message struct {
 }
 
 // 协议编码
-func (message *Message) Encode() ([]byte, error) {
+func (message *Message) Encode(key ...*rsa.PublicKey) ([]byte, error) {
 	// 编码消息体
 	count := 0
 	var err error
@@ -25,6 +28,18 @@ func (message *Message) Encode() ([]byte, error) {
 		body, err = message.Body.Encode()
 		if err != nil {
 			return nil, err
+		}
+
+		if len(key) > 0 && key[0] != nil {
+			message.Header.Property.enableEncrypt()
+			body, err = rsa.EncryptOAEP(sha1.New(), rand.Reader, key[0], body, nil)
+			if err != nil {
+				log.WithFields(log.Fields{
+					"id":     fmt.Sprintf("0x%x", message.Header.MsgID),
+					"reason": err,
+				}).Warn("[JT/T808] encrypt body failed")
+				return nil, err
+			}
 		}
 	}
 	checkSum, count = message.computeChecksum(body, checkSum, count)
@@ -51,7 +66,7 @@ func (message *Message) Encode() ([]byte, error) {
 }
 
 // 协议解码
-func (message *Message) Decode(data []byte) error {
+func (message *Message) Decode(data []byte, key ...*rsa.PrivateKey) error {
 	// 检验标志位
 	if len(data) < 2 || data[0] != PrefixID || data[len(data)-1] != PrefixID {
 		return errors.ErrInvalidMessage
@@ -119,7 +134,7 @@ func (message *Message) Decode(data []byte) error {
 	if err != nil {
 		return err
 	}
-	if !header.Property.IsPacket() {
+	if !header.Property.IsEnablePacket() {
 		buffer = buffer[MessageHeaderSize:]
 	} else {
 		buffer = buffer[MessageHeaderSize+4:]
@@ -133,6 +148,25 @@ func (message *Message) Decode(data []byte) error {
 			"actual": len(buffer),
 		}).Warn("[JT/T808] body length mismatch")
 	} else {
+		if header.Property.IsEnableEncrypt() {
+			if len(key) == 0 || key[0] == nil {
+				log.WithFields(log.Fields{
+					"id":     fmt.Sprintf("0x%x", header.MsgID),
+					"reason": "private key not found",
+				}).Warn("[JT/T808] decrypt body failed")
+				return errors.ErrDecryptMessageFailed
+			}
+
+			buffer, err = rsa.DecryptOAEP(sha1.New(), rand.Reader, key[0], buffer, nil)
+			if err != nil {
+				log.WithFields(log.Fields{
+					"id":     fmt.Sprintf("0x%x", header.MsgID),
+					"reason": err,
+				}).Warn("[JT/T808] decrypt body failed")
+				return errors.ErrDecryptMessageFailed
+			}
+		}
+
 		entity, _, err := message.decode(uint16(header.MsgID), buffer)
 		if err == nil {
 			message.Body = entity

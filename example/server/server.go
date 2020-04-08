@@ -67,7 +67,7 @@ func handleUploadMediaPacket(session *go808.Session, message *protocol.Message) 
 }
 
 func main() {
-	server := go808.NewServer(go808.Options{
+	server, _ := go808.NewServer(go808.Options{
 		Keepalive:       60,
 		AutoMergePacket: true,
 		CloseHandler:    nil,

@@ -19,7 +19,7 @@ const (
 // 终端应答
 type T808_0x8100 struct {
 	// 应答流水号
-	MessageSerialNo uint16
+	MsgSerialNo uint16
 	// 结果
 	Result T808_0x8100_Result
 	// 鉴权码
@@ -34,7 +34,7 @@ func (entity *T808_0x8100) Encode() ([]byte, error) {
 	writer := NewWriter()
 
 	// 写入消息流水号
-	writer.WriteUint16(entity.MessageSerialNo)
+	writer.WriteUint16(entity.MsgSerialNo)
 
 	// 写入响应结果
 	writer.WriteByte(byte(entity.Result))
@@ -55,7 +55,7 @@ func (entity *T808_0x8100) Decode(data []byte) (int, error) {
 	reader := NewReader(data)
 
 	// 读取流水号
-	messageSerialNo, err := reader.ReadUint16()
+	msgSerialNo, err := reader.ReadUint16()
 	if err != nil {
 		return 0, err
 	}
@@ -75,6 +75,6 @@ func (entity *T808_0x8100) Decode(data []byte) (int, error) {
 	}
 
 	entity.Result = T808_0x8100_Result(temp)
-	entity.MessageSerialNo = messageSerialNo
+	entity.MsgSerialNo = msgSerialNo
 	return len(data) - reader.Len(), nil
 }

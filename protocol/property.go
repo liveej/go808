@@ -7,16 +7,28 @@ import (
 // 消息体属性
 type Property uint16
 
-// 设置分包
-func (property *Property) setPacket() {
+// 启用分包
+func (property *Property) enablePacket() {
 	val := uint16(*property)
 	*property = Property(val | (1 << 13))
 }
 
+// 启用加密
+func (property *Property) enableEncrypt() {
+	val := uint16(*property)
+	*property = Property(val | (1 << 10))
+}
+
 // 是否分包
-func (property Property) IsPacket() bool {
+func (property Property) IsEnablePacket() bool {
 	val := uint16(property)
 	return val&(1<<13) > 0
+}
+
+// 是否加密
+func (property Property) IsEnableEncrypt() bool {
+	val := uint16(property)
+	return val&(1<<10) > 0
 }
 
 // 获取消息体长度

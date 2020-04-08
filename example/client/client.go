@@ -31,8 +31,8 @@ func main() {
 	// 终端鉴权
 	message := protocol.Message{
 		Header: protocol.Header{
-			IccID:           19901234567,
-			MessageSerialNo: 1,
+			IccID:       19901234567,
+			MsgSerialNo: 1,
 		},
 		Body: &protocol.T808_0x0102{
 			AuthKey: "12345678",
@@ -49,8 +49,8 @@ func main() {
 	// 上报位置
 	message = protocol.Message{
 		Header: protocol.Header{
-			IccID:           19901234567,
-			MessageSerialNo: 2,
+			IccID:       19901234567,
+			MsgSerialNo: 2,
 		},
 		Body: &protocol.T808_0x0200{
 			Alarm:     2342,
@@ -94,8 +94,8 @@ func main() {
 		}
 
 		header := protocol.Header{
-			IccID:           19901234567,
-			MessageSerialNo: 3,
+			IccID:       19901234567,
+			MsgSerialNo: 3,
 		}
 		header.Packet = &protocol.Packet{
 			Sum: uint16(sum),
@@ -105,8 +105,8 @@ func main() {
 			Header: header,
 			Body: &protocol.T808_0x0801{
 				MediaID:   1024,
-				Type:      protocol.MediaTypeAudio,
-				Coding:    protocol.MediaCodingJPEG,
+				Type:      protocol.T808_0x0800_MediaTypeAudio,
+				Coding:    protocol.T808_0x0800_MediaCodingJPEG,
 				Event:     13,
 				ChannelID: 28,
 				Location: protocol.T808_0x0200{
@@ -155,11 +155,11 @@ func onMessageReceived(conn *net.TCPConn, waitGroup *sync.WaitGroup) {
 		if message.Header.MsgID == protocol.MsgT808_0x8104 {
 			message = protocol.Message{
 				Header: protocol.Header{
-					IccID:           19901234567,
-					MessageSerialNo: 1000,
+					IccID:       19901234567,
+					MsgSerialNo: 1000,
 				},
 				Body: &protocol.T808_0x0104{
-					ReplyMsgSerialNo: message.Header.MessageSerialNo,
+					ReplyMsgSerialNo: message.Header.MsgSerialNo,
 					Params: []*protocol.Param{
 						new(protocol.Param).SetByte(0x0084, 24),
 						new(protocol.Param).SetBytes(0x0110, []byte{1, 2, 3, 4, 5, 6, 7, 8}),

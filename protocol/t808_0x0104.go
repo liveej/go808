@@ -42,11 +42,11 @@ func (entity *T808_0x0104) Decode(data []byte) (int, error) {
 	reader := NewReader(data)
 
 	// 读取消息序列号
-	responseMessageSerialNo, err := reader.ReadUint16()
+	responseMsgSerialNo, err := reader.ReadUint16()
 	if err != nil {
 		return 0, err
 	}
-	entity.ReplyMsgSerialNo = responseMessageSerialNo
+	entity.ReplyMsgSerialNo = responseMsgSerialNo
 
 	// 读取参数个数
 	paramNums, err := reader.ReadByte()
