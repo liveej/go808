@@ -2,6 +2,10 @@ package main
 
 import (
 	"bytes"
+	"crypto/rsa"
+	"crypto/x509"
+	"encoding/pem"
+	"errors"
 	"fmt"
 	"github.com/shopspring/decimal"
 	"go808"
@@ -11,7 +15,47 @@ import (
 	"time"
 )
 
+var privateKey = `-----BEGIN RSA PRIVATE KEY-----
+MIICXgIBAAKBgQDi8hNwzJ8cgEZqFRBG3vQQhrRn+57enZMhc1F/C8jU2ywaZnWB
+XCeWxdh5NMfoEMu0464Oetu2/94AvKEvr/C/tdIIZhqgvYOrGWOPAQ1XSCC29ldZ
+0GpeaShiiQgKlmfyWYnWLQNmbgKTa6Wyu+nl1MuYWbKEuYsFC5pjdSIlMwIDAQAB
+AoGBANZjpzfdJcZP67UVNu4setYN2umMS1Wz+CUWgnuJT2y9q9k4x3Kv8vo85rYB
+xYOWMkos9+XX7C3hYwDBMWgSRlOcwEL8bjd4Tizwez9WTOAwjnwmZoZWQuDkeYzd
+haWlSq6c2wc0H6G07nGWfrIbfAZ8GaqpzsaN6+mAZ1ZVJNn5AkEA/qxQNApmEFGC
+KlEJCPYHxVSarbiPOgPOSt123n42f5wluPe81eU2vmFSDZ1Rrv4MDRDIqtWMJS1V
+o5bdWYNkLwJBAOQgx4El4Ezvcw8I7lIuz8z3ssno3+EcP6mtLJ0ihQ2zsm4TcdYV
+MYP45/+eKnOc2BBMPCQsreYuwXRCEPuhmj0CQQCxgomkvFrHpQiFVlZl2JcyA/aM
+f8fVODHiHNtt2atC5yOj+Ym1zT6LFGqM8sqsnobn1HsKGC7G+wJmNBG1AtAhAkA/
+omkkPFWCAHUe54XbBNXQPfPwYHY6y+9yPC0qs9tbhBmsnN3vMsA6KO9GHW+ICmM2
+wJ0yFgh4Ieiyrk8gceadAkEAmS+XB0UWLMYlSjG2PGm06UAm/frvEFNu8742qQSJ
+zS1yTivTUIflWm77kvUIiJJZP7UVwGTDSx3atOICtedimw==
+-----END RSA PRIVATE KEY-----
+`
+
+func GetTestPrivateKey() (*rsa.PrivateKey, error) {
+	block, _ := pem.Decode([]byte(privateKey))
+	if block == nil {
+		return nil, errors.New("get private key error")
+	}
+
+	privateKey, err := x509.ParsePKCS1PrivateKey(block.Bytes)
+	if err == nil {
+		return privateKey, nil
+	}
+
+	privateKey2, err := x509.ParsePKCS8PrivateKey(block.Bytes)
+	if err != nil {
+		return nil, err
+	}
+	return privateKey2.(*rsa.PrivateKey), nil
+}
+
 func main() {
+	privateKey, err := GetTestPrivateKey()
+	if err != nil {
+		panic(err)
+	}
+
 	tcpAddr, err := net.ResolveTCPAddr(
 		"tcp", "127.0.0.1:8808")
 	if err != nil {
@@ -23,10 +67,6 @@ func main() {
 		panic(err)
 	}
 	defer conn.Close()
-
-	var waitGroup sync.WaitGroup
-	waitGroup.Add(1)
-	go onMessageReceived(conn, &waitGroup)
 
 	// 终端鉴权
 	message := protocol.Message{
@@ -61,6 +101,24 @@ func main() {
 			Speed:     160,
 			Direction: 72,
 			Time:      time.Unix(time.Now().Unix(), 0),
+		},
+	}
+	data, err = message.Encode()
+	if err != nil {
+		panic(data)
+	}
+	if _, err = conn.Write(data); err != nil {
+		panic(err)
+	}
+
+	// 上传公钥
+	message = protocol.Message{
+		Header: protocol.Header{
+			IccID:       19901234567,
+			MsgSerialNo: 3,
+		},
+		Body: &protocol.T808_0x0A00{
+			PublicKey: &privateKey.PublicKey,
 		},
 	}
 	data, err = message.Encode()
@@ -132,6 +190,9 @@ func main() {
 		offset += limit
 	}
 
+	var waitGroup sync.WaitGroup
+	waitGroup.Add(1)
+	go onMessageReceived(conn, &waitGroup)
 	waitGroup.Wait()
 }
 
@@ -178,6 +239,8 @@ func onMessageReceived(conn *net.TCPConn, waitGroup *sync.WaitGroup) {
 			}
 		} else if message.Header.MsgID == protocol.MsgT808_0x8800 {
 			fmt.Println("===========================> 媒体上传成功 <===========================")
+		} else if message.Header.MsgID == protocol.MsgT808_0x8A00 {
+			fmt.Println("===========================> 收到平台RSA公钥 <===========================")
 		}
 	}
 }

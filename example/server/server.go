@@ -1,12 +1,51 @@
 package main
 
 import (
+	"crypto/rsa"
+	"crypto/x509"
+	"encoding/pem"
+	"errors"
 	"fmt"
 	log "github.com/sirupsen/logrus"
 	"go808"
 	"go808/protocol"
 	"go808/protocol/extra"
 )
+
+var privateKey = `-----BEGIN RSA PRIVATE KEY-----
+MIICXgIBAAKBgQDYKDhr0jA+/Fvcf/Fcv7Xn8PC2lkHCUjqE2LdMXAN+4RVve4PC
+hh1dllgECC4doxK5ukEUijJeCwUrzLW2hzoxgN//Z9B6+LuW6twjF4vAVy1M6Abo
+R69KNp2o34tDXm+Vo+4dgcHgBrH9s2ANqY++ImV0se+y6cd4Eo6bqfop/QIDAQAB
+AoGBAMJBuxri5WrlfmS2MqIoxACy3pEojeZl4aNb47bjBl0zSQFMXkgmISPnJihR
+dag60mxJP42G+ObdPoNzUGa+NoN5Gn8ro8esrBrOiUBdFIl7e24xQKd6skxoelIX
+1dc2SzN5vOKFLAbu7r6GCohIpKsi0Icsldgh3REWJhmvkKKhAkEA+JSNOO2kxX5g
+9kbZ8rfhUYN/xWWsCRXBcewocVlEUuit7QlZZeYYhAzoF2UlX7YjbPhWKEJIGPua
+vLiMg+9+iQJBAN6b6tE59CRHd3JeSfs2x4Czudeb0hdOxdR2wnecOexP/LncWrRI
+HOGqqdZFkAsrFyhZ3k2+Eff3fuV7GEg+UtUCQBUtGobB/+pvJLV2PbTmo0Q9bpIT
+Yj934f3hf2SAlUh21/I8fKgonOgK7W6oyDFKI+Rxl21gkCHItVrkYdwPd/kCQQCU
+fWTRU9srKBDhVUv8KrpBe6GH1QT7TyxfYSivKKLqoyBtyjMm9sNtNK49pAFFseSs
+oeXL7fGGeq1G3imAZzJRAkEA7rIZYUjRmmqiNTFILkFo6OZ9cYd7AyZWg2KckUQ4
+pwdWR1prOW0BORYozJc3ZloSN4JZP5Lu2gCerRNGRdenDw==
+-----END RSA PRIVATE KEY-----
+`
+
+func GetTestPrivateKey() (*rsa.PrivateKey, error) {
+	block, _ := pem.Decode([]byte(privateKey))
+	if block == nil {
+		return nil, errors.New("get private key error")
+	}
+
+	privateKey, err := x509.ParsePKCS1PrivateKey(block.Bytes)
+	if err == nil {
+		return privateKey, nil
+	}
+
+	privateKey2, err := x509.ParsePKCS8PrivateKey(block.Bytes)
+	if err != nil {
+		return nil, err
+	}
+	return privateKey2.(*rsa.PrivateKey), nil
+}
 
 // 处理终端鉴权
 func handleAuthentication(session *go808.Session, message *protocol.Message) {
@@ -66,14 +105,39 @@ func handleUploadMediaPacket(session *go808.Session, message *protocol.Message) 
 	})
 }
 
+// 处理终端 RSA公钥
+func handleUploadRsaPublicKey(session *go808.Session, message *protocol.Message) {
+	// 设置终端公钥
+	entity := message.Body.(*protocol.T808_0x0A00)
+	session.SetPublicKey(entity.PublicKey)
+
+	// 回复平台应答
+	session.Reply(message, protocol.T808_0x8100_ResultSuccess)
+
+	// 下发平台公钥
+	key := session.GetServer().GetPrivateKey()
+	if key != nil {
+		session.Send(&protocol.T808_0x8A00{
+			PublicKey: &key.PublicKey,
+		})
+	}
+}
+
 func main() {
+	privateKey, err := GetTestPrivateKey()
+	if err != nil {
+		panic(err)
+	}
+
 	server, _ := go808.NewServer(go808.Options{
 		Keepalive:       60,
 		AutoMergePacket: true,
 		CloseHandler:    nil,
+		PrivateKey:      privateKey,
 	})
 	server.AddHandler(protocol.MsgT808_0x0102, handleAuthentication)
 	server.AddHandler(protocol.MsgT808_0x0200, handleReportLocation)
 	server.AddHandler(protocol.MsgT808_0x0801, handleUploadMediaPacket)
+	server.AddHandler(protocol.MsgT808_0x0A00, handleUploadRsaPublicKey)
 	server.Run("tcp", 8808)
 }

@@ -99,6 +99,14 @@ func (codec *ProtocolCodec) Send(msg interface{}) error {
 
 // 接收消息
 func (codec *ProtocolCodec) Receive() (interface{}, error) {
+	message, ok, err := codec.readFromBuffer()
+	if ok {
+		return message, nil
+	}
+	if err != nil {
+		return nil, err
+	}
+
 	var buffer [128]byte
 	for {
 		count, err := io.ReadAtLeast(codec.r, buffer[:], 1)
@@ -114,53 +122,64 @@ func (codec *ProtocolCodec) Receive() (interface{}, error) {
 			return nil, errors.ErrBodyTooLong
 		}
 
-		data := codec.bufferReceiving.Bytes()
-		if data[0] != protocol.PrefixID {
-			i := 0
-			for ; i < len(data); i++ {
-				if data[i] == protocol.PrefixID {
-					break
-				}
-			}
-			codec.bufferReceiving.Next(i)
-			log.WithFields(log.Fields{
-				"data":   hex.EncodeToString(data),
-				"reason": errors.ErrNotFoundPrefixID,
-			}).Error("[JT/T 808] failed to receive message")
-			return nil, errors.ErrNotFoundPrefixID
+		message, ok, err := codec.readFromBuffer()
+		if ok {
+			return message, nil
 		}
+		if err != nil {
+			return nil, err
+		}
+	}
+}
 
-		if codec.bufferReceiving.Len() == 0 {
-			continue
-		}
-		i := 1
-		data = codec.bufferReceiving.Bytes()
+// 从缓冲区读取
+func (codec *ProtocolCodec) readFromBuffer() (protocol.Message, bool, error) {
+	if codec.bufferReceiving.Len() == 0 {
+		return protocol.Message{}, false, nil
+	}
+
+	data := codec.bufferReceiving.Bytes()
+	if data[0] != protocol.PrefixID {
+		i := 0
 		for ; i < len(data); i++ {
 			if data[i] == protocol.PrefixID {
 				break
 			}
 		}
-		if i == len(data) {
-			continue
-		}
-
-		var message protocol.Message
-		if err = message.Decode(data[:i+1], codec.privateKey); err != nil {
-			codec.bufferReceiving.Next(i + 1)
-			log.WithFields(log.Fields{
-				"data":   fmt.Sprintf("0x%x", hex.EncodeToString(data[:i+1])),
-				"reason": err,
-			}).Error("[JT/T 808] failed to receive message")
-			return nil, err
-		}
-		codec.bufferReceiving.Next(i + 1)
-
+		codec.bufferReceiving.Next(i)
 		log.WithFields(log.Fields{
-			"id": fmt.Sprintf("0x%x", message.Header.MsgID),
-		}).Debug("[JT/T 808] new message received,")
-		log.WithFields(log.Fields{
-			"data": fmt.Sprintf("0x%x", hex.EncodeToString(data[:i+1])),
-		}).Debug("[JT/T 808] show message hex string")
-		return message, nil
+			"data":   hex.EncodeToString(data),
+			"reason": errors.ErrNotFoundPrefixID,
+		}).Error("[JT/T 808] failed to receive message")
+		return protocol.Message{}, false, errors.ErrNotFoundPrefixID
 	}
+
+	end := 1
+	for ; end < len(data); end++ {
+		if data[end] == protocol.PrefixID {
+			break
+		}
+	}
+	if end == len(data) {
+		return protocol.Message{}, false, nil
+	}
+
+	var message protocol.Message
+	if err := message.Decode(data[:end+1], codec.privateKey); err != nil {
+		codec.bufferReceiving.Next(end + 1)
+		log.WithFields(log.Fields{
+			"data":   fmt.Sprintf("0x%x", hex.EncodeToString(data[:end+1])),
+			"reason": err,
+		}).Error("[JT/T 808] failed to receive message")
+		return protocol.Message{}, false, err
+	}
+	codec.bufferReceiving.Next(end + 1)
+
+	log.WithFields(log.Fields{
+		"id": fmt.Sprintf("0x%x", message.Header.MsgID),
+	}).Debug("[JT/T 808] new message received")
+	log.WithFields(log.Fields{
+		"data": fmt.Sprintf("0x%x", hex.EncodeToString(data[:end+1])),
+	}).Trace("[JT/T 808] message hex string")
+	return message, true, nil
 }
