@@ -2,7 +2,6 @@ package protocol
 
 import (
 	"bytes"
-	"crypto/rand"
 	"crypto/rsa"
 	"crypto/sha1"
 	"fmt"
@@ -32,7 +31,7 @@ func (message *Message) Encode(key ...*rsa.PublicKey) ([]byte, error) {
 
 		if len(key) > 0 && key[0] != nil {
 			message.Header.Property.enableEncrypt()
-			body, err = rsa.EncryptOAEP(sha1.New(), rand.Reader, key[0], body, nil)
+			body, err = EncryptOAEP(sha1.New(), key[0], body, nil)
 			if err != nil {
 				log.WithFields(log.Fields{
 					"id":     fmt.Sprintf("0x%x", message.Header.MsgID),
@@ -157,7 +156,7 @@ func (message *Message) Decode(data []byte, key ...*rsa.PrivateKey) error {
 				return errors.ErrDecryptMessageFailed
 			}
 
-			buffer, err = rsa.DecryptOAEP(sha1.New(), rand.Reader, key[0], buffer, nil)
+			buffer, err = DecryptOAEP(sha1.New(), key[0], buffer, nil)
 			if err != nil {
 				log.WithFields(log.Fields{
 					"id":     fmt.Sprintf("0x%x", header.MsgID),

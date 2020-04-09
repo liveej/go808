@@ -2,10 +2,55 @@ package protocol
 
 import (
 	"bytes"
+	"crypto/rand"
+	"crypto/rsa"
 	"github.com/shopspring/decimal"
 	"go808/errors"
+	"hash"
 	"time"
 )
+
+// 使用RSA-OAEP加密
+func EncryptOAEP(hash hash.Hash, pub *rsa.PublicKey, msg []byte, label []byte) ([]byte, error) {
+	buffer := bytes.NewBuffer(nil)
+	chunks := bytesSplit(msg, pub.Size()-2*hash.Size()-2)
+	for _, chunk := range chunks {
+		ciphertext, err := rsa.EncryptOAEP(hash, rand.Reader, pub, chunk, label)
+		if err != nil {
+			return nil, err
+		}
+		buffer.Write(ciphertext)
+	}
+	return buffer.Bytes(), nil
+}
+
+// 使用RSA-OAEP解密
+func DecryptOAEP(hash hash.Hash, priv *rsa.PrivateKey, ciphertext []byte, label []byte) ([]byte, error) {
+	buffer := bytes.NewBuffer(nil)
+	chunks := bytesSplit(ciphertext, priv.Size())
+	for _, chunk := range chunks {
+		plaintext, err := rsa.DecryptOAEP(hash, rand.Reader, priv, chunk, label)
+		if err != nil {
+			return nil, err
+		}
+		buffer.Write(plaintext)
+	}
+	return buffer.Bytes(), nil
+}
+
+// bytes切割
+func bytesSplit(data []byte, limit int) [][]byte {
+	var chunk []byte
+	chunks := make([][]byte, 0, len(data)/limit+1)
+	for len(data) >= limit {
+		chunk, data = data[:limit], data[limit:]
+		chunks = append(chunks, chunk)
+	}
+	if len(data) > 0 {
+		chunks = append(chunks, data[:len(data)])
+	}
+	return chunks
+}
 
 // bytes转字符串
 func bytesToString(data []byte) string {
