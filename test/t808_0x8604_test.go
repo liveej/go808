@@ -18,8 +18,8 @@ func TestT808_0x8604_EncodeDecode(t *testing.T) {
 		MaxSpeed:  1024,
 		Duration:  60,
 		Vertexes: []protocol.Vertex{
-			{Lat: decimal.NewFromFloat(123.234561), Lon: decimal.NewFromFloat(-23.432567)},
-			{Lat: decimal.NewFromFloat(23.341098), Lon: decimal.NewFromFloat(-12.213435)},
+			{Lat: decimal.NewFromFloat(123.234561), Lng: decimal.NewFromFloat(-23.432567)},
+			{Lat: decimal.NewFromFloat(23.341098), Lng: decimal.NewFromFloat(-12.213435)},
 		},
 	}
 	data, err := message.Encode()

@@ -63,7 +63,7 @@ type CircleArea struct {
 	// 中心点纬度
 	Lat decimal.Decimal
 	// 中心点经度
-	Lon decimal.Decimal
+	Lng decimal.Decimal
 	// 半径
 	Radius uint32
 	// 起始时间
@@ -110,8 +110,8 @@ func (entity *T808_0x8600) Encode() ([]byte, error) {
 		if lat < 0 {
 			item.Attribute.SetSouthLatitude(true)
 		}
-		lon := item.Lon.Mul(mul).IntPart()
-		if lon < 0 {
+		lng := item.Lng.Mul(mul).IntPart()
+		if lng < 0 {
 			item.Attribute.SetWestLongitude(true)
 		}
 
@@ -122,7 +122,7 @@ func (entity *T808_0x8600) Encode() ([]byte, error) {
 		writer.WriteUint32(uint32(math.Abs(float64(lat))))
 
 		// 写入中心点经度
-		writer.WriteUint32(uint32(math.Abs(float64(lon))))
+		writer.WriteUint32(uint32(math.Abs(float64(lng))))
 
 		// 写入半径
 		writer.WriteUint32(item.Radius)
@@ -191,13 +191,13 @@ func (entity *T808_0x8600) Decode(data []byte) (int, error) {
 		}
 
 		// 读取中心点经度
-		lon, err := reader.ReadUint32()
+		lng, err := reader.ReadUint32()
 		if err != nil {
 			return 0, err
 		}
-		area.Lat, area.Lon = getGeoPoint(
+		area.Lat, area.Lng = getGeoPoint(
 			lat, area.Attribute.GetLatitudeType() == SouthLatitudeType,
-			lon, area.Attribute.GetLongitudeType() == WestLongitudeType)
+			lng, area.Attribute.GetLongitudeType() == WestLongitudeType)
 
 		// 读取半径
 		area.Radius, err = reader.ReadUint32()

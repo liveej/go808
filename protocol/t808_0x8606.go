@@ -78,7 +78,7 @@ type T808_0x8606_Point struct {
 	// 拐点纬度
 	Lat decimal.Decimal
 	// 拐点经度
-	Lon decimal.Decimal
+	Lng decimal.Decimal
 	// 路段宽度
 	Width byte
 	// 路段属性
@@ -129,8 +129,8 @@ func (entity *T808_0x8606) Encode() ([]byte, error) {
 		if lat < 0 {
 			point.Attribute.SetSouthLatitude(true)
 		}
-		lon := point.Lon.Mul(mul).IntPart()
-		if lon < 0 {
+		lng := point.Lng.Mul(mul).IntPart()
+		if lng < 0 {
 			point.Attribute.SetWestLongitude(true)
 		}
 
@@ -138,7 +138,7 @@ func (entity *T808_0x8606) Encode() ([]byte, error) {
 		writer.WriteUint32(uint32(math.Abs(float64(lat))))
 
 		// 写入拐点纬度
-		writer.WriteUint32(uint32(math.Abs(float64(lon))))
+		writer.WriteUint32(uint32(math.Abs(float64(lng))))
 
 		// 设置拐点属性
 		point.Attribute.SetTimeLimit(point.TimeTooLong != nil && point.TimeTooShort != nil)
@@ -242,7 +242,7 @@ func (entity *T808_0x8606) Decode(data []byte) (int, error) {
 			return 0, err
 		}
 		point.Attribute = T808_0x8606_SectionAttribute(attribute)
-		point.Lat, point.Lon = getGeoPoint(
+		point.Lat, point.Lng = getGeoPoint(
 			latitude, point.Attribute.GetLatitudeType() == SouthLatitudeType,
 			longitude, point.Attribute.GetLongitudeType() == WestLongitudeType)
 

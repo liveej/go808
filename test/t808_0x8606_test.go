@@ -30,7 +30,7 @@ func TestT808_0x8606_EncodeDecode(t *testing.T) {
 				ID:                1,
 				SectionID:         1,
 				Lat:               decimal.NewFromFloat(23.562345),
-				Lon:               decimal.NewFromFloat(-128.323123),
+				Lng:               decimal.NewFromFloat(-128.323123),
 				Width:             15,
 				Attribute:         attr,
 				TimeTooLong:       &timeTooLong,

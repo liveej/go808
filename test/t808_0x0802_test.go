@@ -22,7 +22,7 @@ func TestT808_0x0802_EncodeDecode(t *testing.T) {
 					Alarm:     2342,
 					Status:    8,
 					Lat:       decimal.NewFromFloat(23.562345),
-					Lon:       decimal.NewFromFloat(-128.323123),
+					Lng:       decimal.NewFromFloat(-128.323123),
 					Altitude:  2345,
 					Speed:     160,
 					Direction: 72,

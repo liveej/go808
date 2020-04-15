@@ -137,10 +137,10 @@ func fromBCDTime(bcd []byte) (time.Time, error) {
 }
 
 // 获取经纬度
-func getGeoPoint(lat uint32, south bool, lon uint32, west bool) (decimal.Decimal, decimal.Decimal) {
+func getGeoPoint(lat uint32, south bool, lng uint32, west bool) (decimal.Decimal, decimal.Decimal) {
 	div := decimal.NewFromFloat(1000000)
 	fLat := decimal.NewFromInt(int64(lat)).Div(div)
-	fLon := decimal.NewFromInt(int64(lon)).Div(div)
+	fLon := decimal.NewFromInt(int64(lng)).Div(div)
 	if south {
 		fLat = decimal.Zero.Sub(fLat)
 	}

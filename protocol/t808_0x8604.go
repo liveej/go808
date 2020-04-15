@@ -11,7 +11,7 @@ type Vertex struct {
 	// 顶点纬度
 	Lat decimal.Decimal
 	// 顶点经度
-	Lon decimal.Decimal
+	Lng decimal.Decimal
 }
 
 // 设置多边形区域
@@ -51,13 +51,13 @@ func (entity *T808_0x8604) Encode() ([]byte, error) {
 		if lat.Cmp(decimal.Zero) < 0 {
 			entity.Attribute.SetSouthLatitude(true)
 		}
-		lon := vertex.Lon.Mul(mul)
-		if lon.Cmp(decimal.Zero) < 0 {
+		lng := vertex.Lng.Mul(mul)
+		if lng.Cmp(decimal.Zero) < 0 {
 			entity.Attribute.SetWestLongitude(true)
 		}
 		vertexes = append(vertexes, Vertex{
 			Lat: lat,
-			Lon: lon,
+			Lng: lng,
 		})
 	}
 
@@ -88,7 +88,7 @@ func (entity *T808_0x8604) Encode() ([]byte, error) {
 		writer.WriteUint32(uint32(math.Abs(float64(vertex.Lat.IntPart()))))
 
 		// 写入经度
-		writer.WriteUint32(uint32(math.Abs(float64(vertex.Lon.IntPart()))))
+		writer.WriteUint32(uint32(math.Abs(float64(vertex.Lng.IntPart()))))
 	}
 	return writer.Bytes(), nil
 }
@@ -158,14 +158,14 @@ func (entity *T808_0x8604) Decode(data []byte) (int, error) {
 		}
 
 		// 读取经度
-		lon, err := reader.ReadUint32()
+		lng, err := reader.ReadUint32()
 		if err != nil {
 			return 0, err
 		}
 
-		vertex.Lat, vertex.Lon = getGeoPoint(
+		vertex.Lat, vertex.Lng = getGeoPoint(
 			lat, entity.Attribute.GetLatitudeType() == SouthLatitudeType,
-			lon, entity.Attribute.GetLongitudeType() == WestLongitudeType)
+			lng, entity.Attribute.GetLongitudeType() == WestLongitudeType)
 		entity.Vertexes = append(entity.Vertexes, vertex)
 	}
 	return len(data) - reader.Len(), nil

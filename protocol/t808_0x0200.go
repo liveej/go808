@@ -81,7 +81,7 @@ type T808_0x0200 struct {
 	// 纬度
 	Lat decimal.Decimal
 	// 经度
-	Lon decimal.Decimal
+	Lng decimal.Decimal
 	// 海拔高度
 	// 单位：米
 	Altitude uint16
@@ -113,8 +113,8 @@ func (entity *T808_0x0200) Encode() ([]byte, error) {
 	if lat < 0 {
 		entity.Status.SetSouthLatitude(true)
 	}
-	lon := entity.Lon.Mul(mul).IntPart()
-	if lon < 0 {
+	lng := entity.Lng.Mul(mul).IntPart()
+	if lng < 0 {
 		entity.Status.SetWestLongitude(true)
 	}
 
@@ -125,7 +125,7 @@ func (entity *T808_0x0200) Encode() ([]byte, error) {
 	writer.WriteUint32(uint32(math.Abs(float64(lat))))
 
 	// 写入经度信息
-	writer.WriteUint32(uint32(math.Abs(float64(lon))))
+	writer.WriteUint32(uint32(math.Abs(float64(lng))))
 
 	// 写入海拔高度
 	writer.WriteUint16(entity.Altitude)
@@ -186,7 +186,7 @@ func (entity *T808_0x0200) Decode(data []byte) (int, error) {
 		return 0, err
 	}
 
-	entity.Lat, entity.Lon = getGeoPoint(
+	entity.Lat, entity.Lng = getGeoPoint(
 		latitude, entity.Status.GetLatitudeType() == SouthLatitudeType,
 		longitude, entity.Status.GetLongitudeType() == WestLongitudeType)
 

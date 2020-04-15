@@ -35,7 +35,7 @@ func handleReportLocation(session *go808.Session, message *protocol.Message) {
 		"警告":    fmt.Sprintf("0x%x", entity.Alarm),
 		"状态":    fmt.Sprintf("0x%x", entity.Status),
 		"纬度":    entity.Lat,
-		"经度":    entity.Lon,
+		"经度":    entity.Lng,
 		"海拔":    entity.Altitude,
 		"速度":    entity.Speed,
 		"方向":    entity.Direction,
