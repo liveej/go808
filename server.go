@@ -9,6 +9,7 @@ import (
 	"go808/protocol"
 	"net"
 	"runtime/debug"
+	"strconv"
 	"sync"
 )
 
@@ -24,7 +25,7 @@ type Options struct {
 type Server struct {
 	server     *link.Server
 	handler    sessionHandler
-	timer      *keepaliveTimer
+	timer      *CountdownTimer
 	privateKey *rsa.PrivateKey
 
 	mutex    sync.Mutex
@@ -53,7 +54,7 @@ func NewServer(options Options) (*Server, error) {
 	}
 	server.handler.server = &server
 	server.handler.autoMergePacket = options.AutoMergePacket
-	server.timer = newKeepaliveTimer(options.Keepalive, server.handleReadTimeout)
+	server.timer = NewCountdownTimer(options.Keepalive, server.handleReadTimeout)
 	return &server, nil
 }
 
@@ -132,7 +133,7 @@ func (server *Server) handleClose(session *Session) {
 	delete(server.sessions, session.ID())
 	server.mutex.Unlock()
 
-	server.timer.remove(session.ID())
+	server.timer.Remove(strconv.FormatUint(session.ID(), 10))
 	if server.closeHandler != nil {
 		func() {
 			defer func() {
@@ -150,7 +151,12 @@ func (server *Server) handleClose(session *Session) {
 }
 
 // 处理读超时
-func (server *Server) handleReadTimeout(sessionID uint64) {
+func (server *Server) handleReadTimeout(key string) {
+	sessionID, err := strconv.ParseUint(key, 10, 64)
+	if err != nil {
+		return
+	}
+
 	session, ok := server.GetSession(sessionID)
 	if !ok {
 		return
@@ -181,6 +187,6 @@ func (server *Server) dispatchMessage(session *Session, message *protocol.Messag
 			debug.PrintStack()
 		}
 	}()
-	server.timer.update(session.ID())
+	server.timer.Update(strconv.FormatUint(session.ID(), 10))
 	handler.(MessageHandler)(session, message)
 }

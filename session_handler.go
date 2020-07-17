@@ -7,6 +7,7 @@ import (
 	"go808/protocol"
 	"io/ioutil"
 	"reflect"
+	"strconv"
 )
 
 // Session处理
@@ -25,7 +26,7 @@ func (handler sessionHandler) HandleSession(sess *link.Session) {
 	handler.server.mutex.Lock()
 	handler.server.sessions[sess.ID()] = session
 	handler.server.mutex.Unlock()
-	handler.server.timer.update(session.ID())
+	handler.server.timer.Update(strconv.FormatUint(session.ID(), 10))
 	sess.AddCloseCallback(nil, nil, func() {
 		handler.server.handleClose(session)
 	})
