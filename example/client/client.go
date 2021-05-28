@@ -7,12 +7,13 @@ import (
 	"encoding/pem"
 	"errors"
 	"fmt"
-	"github.com/shopspring/decimal"
-	"go808"
-	"go808/protocol"
 	"net"
 	"sync"
 	"time"
+
+	"gitee.com/coco/go808"
+	"gitee.com/coco/go808/protocol"
+	"github.com/shopspring/decimal"
 )
 
 var privateKey = `-----BEGIN RSA PRIVATE KEY-----

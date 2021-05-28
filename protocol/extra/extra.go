@@ -2,8 +2,8 @@ package extra
 
 import (
 	"fmt"
+	"gitee.com/coco/go808/errors"
 	log "github.com/sirupsen/logrus"
-	"go808/errors"
 )
 
 // 附加信息

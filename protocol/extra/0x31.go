@@ -1,7 +1,7 @@
 package extra
 
 import (
-	"go808/errors"
+	"gitee.com/coco/go808/errors"
 )
 
 // GNSS定位卫星数

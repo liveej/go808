@@ -1,8 +1,8 @@
 package test
 
 import (
+	"gitee.com/coco/go808/protocol"
 	"github.com/stretchr/testify/assert"
-	"go808/protocol"
 	"reflect"
 	"testing"
 	"time"

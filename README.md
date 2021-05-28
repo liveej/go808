@@ -21,9 +21,9 @@ package main
 import (
 	"fmt"
 	log "github.com/sirupsen/logrus"
-	"go808"
-	"go808/protocol"
-	"go808/protocol/extra"
+	"gitee.com/coco/go808"
+	"gitee.com/coco/go808/protocol"
+	"gitee.com/coco/go808/protocol/extra"
 )
 
 // 处理上报位置
@@ -72,8 +72,8 @@ package main
 import (
 	"fmt"
 	log "github.com/sirupsen/logrus"
-	"go808"
-	"go808/protocol"
+	"gitee.com/coco/go808"
+	"gitee.com/coco/go808/protocol"
 )
 
 // 处理终端鉴权
@@ -105,8 +105,8 @@ package main
 
 import (
 	log "github.com/sirupsen/logrus"
-	"go808"
-	"go808/protocol"
+	"gitee.com/coco/go808"
+	"gitee.com/coco/go808/protocol"
 )
 
 // 处理上传媒体

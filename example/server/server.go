@@ -6,10 +6,11 @@ import (
 	"encoding/pem"
 	"errors"
 	"fmt"
+
+	"gitee.com/coco/go808"
+	"gitee.com/coco/go808/protocol"
+	"gitee.com/coco/go808/protocol/extra"
 	log "github.com/sirupsen/logrus"
-	"go808"
-	"go808/protocol"
-	"go808/protocol/extra"
 )
 
 var privateKey = `-----BEGIN RSA PRIVATE KEY-----

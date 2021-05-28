@@ -2,9 +2,9 @@ package go808
 
 import (
 	"crypto/rsa"
+	"gitee.com/coco/go808/protocol"
 	"github.com/funny/link"
 	log "github.com/sirupsen/logrus"
-	"go808/protocol"
 	"runtime/debug"
 	"sync"
 	"sync/atomic"

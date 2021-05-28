@@ -1,4 +1,4 @@
-module go808
+module gitee.com/coco/go808
 
 go 1.13
 

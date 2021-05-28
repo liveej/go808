@@ -2,7 +2,7 @@ package go808
 
 import (
 	"fmt"
-	"go808/protocol"
+	"gitee.com/coco/go808/protocol"
 	"io"
 	"io/ioutil"
 	"os"

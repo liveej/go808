@@ -2,7 +2,7 @@ package extra
 
 import (
 	"encoding/binary"
-	"go808/errors"
+	"gitee.com/coco/go808/errors"
 )
 
 // 模拟量

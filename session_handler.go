@@ -2,9 +2,9 @@ package go808
 
 import (
 	"fmt"
+	"gitee.com/coco/go808/protocol"
 	"github.com/funny/link"
 	log "github.com/sirupsen/logrus"
-	"go808/protocol"
 	"io/ioutil"
 	"reflect"
 	"strconv"

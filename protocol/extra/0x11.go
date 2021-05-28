@@ -3,7 +3,7 @@ package extra
 import (
 	"bytes"
 	"encoding/binary"
-	"go808/errors"
+	"gitee.com/coco/go808/errors"
 )
 
 // 超速报警

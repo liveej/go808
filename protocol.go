@@ -5,10 +5,10 @@ import (
 	"crypto/rsa"
 	"encoding/hex"
 	"fmt"
+	"gitee.com/coco/go808/errors"
+	"gitee.com/coco/go808/protocol"
 	"github.com/funny/link"
 	log "github.com/sirupsen/logrus"
-	"go808/errors"
-	"go808/protocol"
 	"io"
 )
 

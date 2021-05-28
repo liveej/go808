@@ -1,10 +1,10 @@
 package test
 
 import (
+	"gitee.com/coco/go808/protocol"
+	"gitee.com/coco/go808/protocol/extra"
 	"github.com/shopspring/decimal"
 	"github.com/stretchr/testify/assert"
-	"go808/protocol"
-	"go808/protocol/extra"
 	"testing"
 	"time"
 )
