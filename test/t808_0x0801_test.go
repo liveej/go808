@@ -2,7 +2,7 @@ package test
 
 import (
 	"bytes"
-	"gitee.com/coco/go808/protocol"
+	"github.com/liveej/go808/protocol"
 	"github.com/shopspring/decimal"
 	"github.com/stretchr/testify/assert"
 	"testing"

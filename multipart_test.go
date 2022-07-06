@@ -1,7 +1,7 @@
 package go808
 
 import (
-	"gitee.com/coco/go808/protocol"
+	"github.com/liveej/go808/protocol"
 	"github.com/stretchr/testify/assert"
 	"testing"
 )

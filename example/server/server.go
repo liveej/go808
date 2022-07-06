@@ -3,9 +3,9 @@ package main
 import (
 	"fmt"
 
-	"gitee.com/coco/go808"
-	"gitee.com/coco/go808/protocol"
-	"gitee.com/coco/go808/protocol/extra"
+	"github.com/liveej/go808"
+	"github.com/liveej/go808/protocol"
+	"github.com/liveej/go808/protocol/extra"
 	log "github.com/sirupsen/logrus"
 )
 

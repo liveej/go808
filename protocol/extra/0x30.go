@@ -1,7 +1,7 @@
 package extra
 
 import (
-	"gitee.com/coco/go808/errors"
+	"github.com/liveej/go808/errors"
 )
 
 // 无线通信网络信号强度

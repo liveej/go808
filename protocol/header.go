@@ -1,7 +1,7 @@
 package protocol
 
 import (
-	"gitee.com/coco/go808/errors"
+	"github.com/liveej/go808/errors"
 	"strconv"
 )
 

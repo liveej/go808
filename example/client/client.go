@@ -11,8 +11,8 @@ import (
 	"sync"
 	"time"
 
-	"gitee.com/coco/go808"
-	"gitee.com/coco/go808/protocol"
+	"github.com/liveej/go808"
+	"github.com/liveej/go808/protocol"
 	"github.com/shopspring/decimal"
 )
 

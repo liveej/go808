@@ -5,7 +5,7 @@ import (
 	"crypto/rsa"
 	"crypto/sha1"
 	"fmt"
-	"gitee.com/coco/go808/errors"
+	"github.com/liveej/go808/errors"
 	log "github.com/sirupsen/logrus"
 	"reflect"
 )

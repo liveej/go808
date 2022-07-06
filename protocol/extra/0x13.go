@@ -3,7 +3,7 @@ package extra
 import (
 	"bytes"
 	"encoding/binary"
-	"gitee.com/coco/go808/errors"
+	"github.com/liveej/go808/errors"
 )
 
 // 路段行驶报警

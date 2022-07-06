@@ -2,7 +2,7 @@ package extra
 
 import (
 	"encoding/binary"
-	"gitee.com/coco/go808/errors"
+	"github.com/liveej/go808/errors"
 )
 
 // 报警确认

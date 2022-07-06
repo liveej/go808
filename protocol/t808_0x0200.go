@@ -2,8 +2,8 @@ package protocol
 
 import (
 	"fmt"
-	"gitee.com/coco/go808/errors"
-	"gitee.com/coco/go808/protocol/extra"
+	"github.com/liveej/go808/errors"
+	"github.com/liveej/go808/protocol/extra"
 	"github.com/shopspring/decimal"
 	log "github.com/sirupsen/logrus"
 	"math"

@@ -5,9 +5,9 @@ import (
 	"crypto/rsa"
 	"encoding/hex"
 	"fmt"
-	"gitee.com/coco/go808/errors"
-	"gitee.com/coco/go808/protocol"
 	"github.com/funny/link"
+	"github.com/liveej/go808/errors"
+	"github.com/liveej/go808/protocol"
 	log "github.com/sirupsen/logrus"
 	"io"
 )

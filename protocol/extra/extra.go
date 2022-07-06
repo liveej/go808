@@ -2,7 +2,7 @@ package extra
 
 import (
 	"fmt"
-	"gitee.com/coco/go808/errors"
+	"github.com/liveej/go808/errors"
 	log "github.com/sirupsen/logrus"
 )
 

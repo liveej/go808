@@ -1,8 +1,8 @@
 package test
 
 import (
-	"gitee.com/coco/go808/protocol"
-	"gitee.com/coco/go808/protocol/extra"
+	"github.com/liveej/go808/protocol"
+	"github.com/liveej/go808/protocol/extra"
 	"github.com/shopspring/decimal"
 	"github.com/stretchr/testify/assert"
 	"testing"
