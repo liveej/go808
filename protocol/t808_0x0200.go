@@ -41,6 +41,11 @@ func (status T808_0x0200_Status) GetAccState() bool {
 	return GetBitUint32(uint32(status), 0)
 }
 
+// 获取继电器状态
+func (status T808_0x0200_Status) GetRelayState() bool {
+	return GetBitUint32(uint32(status), 10)
+}
+
 // 是否正在定位
 func (status T808_0x0200_Status) Positioning() bool {
 	return GetBitUint32(uint32(status), 1)

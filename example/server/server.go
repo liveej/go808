@@ -30,13 +30,15 @@ func handleReportLocation(session *go808.Session, message *protocol.Message) {
 	fields := log.Fields{
 		"IccID": message.Header.IccID,
 		"警告":    fmt.Sprintf("0x%x", entity.Alarm),
-		"状态":    fmt.Sprintf("0x%x", entity.Status),
+		"状态":    fmt.Sprintf("0x%b", entity.Status),
 		"纬度":    entity.Lat,
 		"经度":    entity.Lng,
 		"海拔":    entity.Altitude,
 		"速度":    entity.Speed,
 		"方向":    entity.Direction,
 		"时间":    entity.Time,
+		"Acc":   entity.Status.GetAccState(),
+		"Relay": entity.Status.GetRelayState(),
 	}
 
 	for _, ext := range entity.Extras {
@@ -45,6 +47,12 @@ func handleReportLocation(session *go808.Session, message *protocol.Message) {
 			fields["行驶里程"] = ext.(*extra.Extra_0x01).Value()
 		case extra.Extra_0x02{}.ID():
 			fields["剩余油量"] = ext.(*extra.Extra_0x02).Value()
+		case extra.Extra_0x5d{}.ID():
+			fields["基站"] = ext.(*extra.Extra_0x5d).Value()
+		case extra.Extra_0xe3{}.ID():
+			fields["电压"] = ext.(*extra.Extra_0xe3).Value()
+		case extra.Extra_0x54{}.ID():
+			fields["WIFI"] = ext.(*extra.Extra_0x54).Value()
 		}
 	}
 	log.WithFields(fields).Info("上报终端位置信息")
@@ -89,6 +97,7 @@ func handleHeartBeat(session *go808.Session, message *protocol.Message) {
 }
 
 func main() {
+	//log.SetFormatter(&log.JSONFormatter{})
 
 	server, _ := go808.NewServer(go808.Options{
 		Keepalive:       60,

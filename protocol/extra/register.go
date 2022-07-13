@@ -26,8 +26,14 @@ const (
 	TypeExtra_0x2b Type = 0x2b
 	// 无线通信网络信号强度
 	TypeExtra_0x30 Type = 0x30
-	// GNSS定位卫星数
+	// TypeExtra_0x31 GNSS定位卫星数
 	TypeExtra_0x31 Type = 0x31
+	// TypeExtra_0x5d 4G基站信息
+	TypeExtra_0x5d Type = 0x5d
+	// TypeExtra_0xe3 电压
+	TypeExtra_0xe3 Type = 0xe3
+	// TypeExtra_0x54 未知
+	TypeExtra_0x54 Type = 0x54
 )
 
 // 消息实体映射
@@ -67,6 +73,15 @@ var entityMapper = map[byte]func() Entity{
 	},
 	byte(TypeExtra_0x31): func() Entity {
 		return new(Extra_0x31)
+	},
+	byte(TypeExtra_0x5d): func() Entity {
+		return new(Extra_0x5d)
+	},
+	byte(TypeExtra_0xe3): func() Entity {
+		return new(Extra_0xe3)
+	},
+	byte(TypeExtra_0x54): func() Entity {
+		return new(Extra_0x54)
 	},
 }
 

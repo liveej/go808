@@ -146,8 +146,9 @@ func (server *Server) handleClose(session *Session) {
 	}
 
 	log.WithFields(log.Fields{
-		"id": session.ID(),
-	}).Debug("[JT/T 808] session closed")
+		"id":        session.ID(),
+		"device_id": session.iccID,
+	}).Debug("session closed")
 }
 
 // 处理读超时
@@ -164,15 +165,16 @@ func (server *Server) handleReadTimeout(key string) {
 	session.Close()
 
 	log.WithFields(log.Fields{
-		"id": sessionID,
-	}).Debug("[JT/T 808] session read timeout")
+		"id":        sessionID,
+		"device_id": session.iccID,
+	}).Debug("session read timeout")
 }
 
 // 分派消息
 func (server *Server) dispatchMessage(session *Session, message *protocol.Message) {
 	log.WithFields(log.Fields{
 		"id": fmt.Sprintf("0x%x", message.Header.MsgID),
-	}).Debug("[JT/T 808] dispatch message")
+	}).Trace("[JT/T 808] dispatch message")
 
 	handler, ok := server.messageHandlers.Load(message.Header.MsgID)
 	if !ok {

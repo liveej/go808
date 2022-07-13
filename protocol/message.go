@@ -173,7 +173,7 @@ func (message *Message) Decode(data []byte, key ...*rsa.PrivateKey) error {
 			log.WithFields(log.Fields{
 				"id":     fmt.Sprintf("0x%x", header.MsgID),
 				"reason": err,
-			}).Warn("[JT/T808] failed to decode message")
+			}).Warn("failed to decode message")
 		}
 	}
 	message.Header = header

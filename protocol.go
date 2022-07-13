@@ -91,9 +91,10 @@ func (codec *ProtocolCodec) Send(msg interface{}) error {
 	}
 
 	log.WithFields(log.Fields{
-		"id":    fmt.Sprintf("0x%x", message.Header.MsgID),
-		"bytes": count,
-	}).Debug("[JT/T 808] write message success")
+		"device_id":   message.Header.IccID,
+		"msg_type_id": fmt.Sprintf("0x%x", message.Header.MsgID),
+		"bytes":       count,
+	}).Debug("TX:")
 	return nil
 }
 
@@ -176,10 +177,15 @@ func (codec *ProtocolCodec) readFromBuffer() (protocol.Message, bool, error) {
 	codec.bufferReceiving.Next(end + 1)
 
 	log.WithFields(log.Fields{
-		"id": fmt.Sprintf("0x%x", message.Header.MsgID),
-	}).Debug("[JT/T 808] new message received")
+		"device_id":   message.Header.IccID,
+		"msg_type_id": fmt.Sprintf("%X", message.Header.MsgID),
+	}).Debug("RX:")
+
 	log.WithFields(log.Fields{
-		"data": fmt.Sprintf("0x%x", hex.EncodeToString(data[:end+1])),
-	}).Trace("[JT/T 808] message hex string")
+		"device_id": message.Header.IccID,
+		"hex":       fmt.Sprintf("%0X", data[:end+1]),
+		//"Hex": fmt.Sprintf("0x%x", hex.EncodeToString(data[:end+1])),
+	}).Trace("RX Raw:")
+
 	return message, true, nil
 }
